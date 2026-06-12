@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Set theme before first paint to avoid flash -->
+    <script>(function(){var t=localStorage.getItem('theme')||'light';document.documentElement.setAttribute('data-theme',t)})();</script>
+
+    <style>
+      #app-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        background: #f5f4f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 28px;
+        pointer-events: none;
+      }
+      [data-theme="dark"] #app-loader { background: #0d0d0d; }
+
+      .loader-name {
+        font-family: Georgia, serif;
+        font-style: italic;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        letter-spacing: 0.01em;
+        color: #0a0a0a;
+        opacity: 0;
+        animation: loaderFadeIn 0.5s ease 0.1s forwards;
+      }
+      [data-theme="dark"] .loader-name { color: #efefef; }
+
+      .loader-track {
+        width: 80px;
+        height: 1px;
+        background: rgba(10,10,10,0.12);
+        overflow: hidden;
+      }
+      [data-theme="dark"] .loader-track { background: rgba(255,255,255,0.12); }
+
+      .loader-bar {
+        height: 100%;
+        background: #0a0a0a;
+        width: 0;
+        animation: loaderBar 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+      }
+      [data-theme="dark"] .loader-bar { background: #efefef; }
+
+      @keyframes loaderFadeIn { to { opacity: 1; } }
+      @keyframes loaderBar    { to { width: 100%; } }
+    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Noel A. — UX Designer</title>
+    <meta name="description" content="Portfolio of Noel A. — UX Designer. Thinking while building.">
+
+    <!-- Google Fonts-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Noto+Serif+JP:wght@200..900&display=swap" rel="stylesheet">
+
+    <!-- Preload the GLB so the browser fetches it immediately -->
+    <link rel="preload" href="/origami_crane_study.glb" as="fetch" crossorigin>
+
+    <!-- Three.js y GSAP — defer so they don't block the first paint -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+  </head>
+  <body>
+    <div id="app-loader">
+      <span class="loader-name">Loading...</span>
+      <div class="loader-track"><div class="loader-bar"></div></div>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

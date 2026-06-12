@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5174/)",
+      "Bash(curl -s http://localhost:5174/src/components/ThemeToggle.jsx)",
+      "Bash(curl -s http://localhost:5174/src/components/Nav.jsx)",
+      "Bash(pkill -f \"vite\")"
+    ]
+  }
+}
