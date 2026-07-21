@@ -108,6 +108,7 @@ html, body {
 
 /* ── Nav ────────────────────────────────────────────────────────────────────── */
 .nav-grid {
+  grid-template-columns: 230px 1fr auto;
   grid-template-rows: 100%;
   align-items: center;
   border-bottom: 1px solid var(--border);
@@ -146,6 +147,7 @@ html, body {
   transition: opacity 0.3s ease, color 0.3s ease;
   position: relative;
   padding: 10px 0;
+  white-space: nowrap;
 }
 
 .nav-link:hover,
@@ -173,13 +175,39 @@ html, body {
 }
 
 .nav-right {
-  border-left: 1px solid var(--border);
   height: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 0 24px;
   transition: border-color 0.3s ease;
 }
+
+/* ── Language switch ── */
+.lang-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.lang-option {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--fg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 4px 6px;
+  opacity: 0.35;
+  transition: opacity 0.25s ease, color 0.3s ease;
+}
+
+.lang-option:hover { opacity: 0.7; }
+
+.lang-option.is-active { opacity: 1; }
 
 /* ── Theme Toggle ───────────────────────────────────────────────────────────── */
 /* Theme toggle pill */
@@ -909,6 +937,7 @@ html, body {
   opacity: 0;
   display: flex;
   align-items: flex-end;
+  justify-content: center;
 }
 
 [data-theme="dark"] .modal-overlay {
@@ -918,6 +947,7 @@ html, body {
 /* Panel slides up from the bottom */
 .modal-panel {
   width: 100%;
+  max-width: 1160px;   /* centered sheet so content isn't stuck to one side */
   max-height: 92vh;
   background: var(--bg);
   border-top-left-radius: 12px;
@@ -1023,7 +1053,7 @@ html, body {
 /* ── Cover image ── */
 .modal-cover {
   width: 100%;
-  aspect-ratio: 16 / 7;
+  flex-shrink: 0; /* the panel is a flex column — without this the cover collapses */
   overflow: hidden;
   background: var(--preview-bg);
   border-bottom: 1px solid var(--border);
@@ -1031,9 +1061,9 @@ html, body {
 }
 
 .modal-cover img {
+  /* natural ratio — show the full screenshot, never crop it */
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
   display: block;
 }
 
@@ -1115,7 +1145,7 @@ html, body {
   font-weight: 400;
   line-height: 1.75;
   color: var(--fg);
-  max-width: 72ch;
+  max-width: 1080px;   /* wider column so media fills the screen; text stays capped below */
   opacity: 0.85;
 }
 
@@ -1138,10 +1168,10 @@ html, body {
 
 /* ── Rich content elements ── */
 .modal-content-text p {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   line-height: 1.75;
-  opacity: 0.75;
-  margin-bottom: 1rem;
+  opacity: 0.82;
+  margin-bottom: 1.1rem;
   max-width: 68ch;
 }
 
@@ -1163,9 +1193,9 @@ html, body {
 }
 
 .modal-list li {
-  font-size: 0.9rem;
+  font-size: 1.02rem;
   line-height: 1.6;
-  padding: 9px 0;
+  padding: 10px 0;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: baseline;
@@ -1220,6 +1250,221 @@ html, body {
 .modal-media--half    .modal-media-slot { aspect-ratio: 4 / 3; }
 .modal-media--tall    .modal-media-slot { aspect-ratio: 4 / 5; }
 
+/* Full: show the whole image at its natural ratio (no crop) — for tall design docs */
+.modal-media--full .modal-media-slot { aspect-ratio: auto; }
+.modal-media--full .modal-media-slot img { height: auto; object-fit: contain; }
+
+/* Doc: natural ratio but displayed narrower, so 1x exports stay sharp */
+.modal-media--doc .modal-media-slot { aspect-ratio: auto; max-width: 720px; }
+.modal-media--doc .modal-media-slot img { height: auto; object-fit: contain; }
+
+/* Key phrases inside case-study paragraphs */
+.modal-content-text strong {
+  font-weight: 650;
+  letter-spacing: -0.005em;
+}
+
+/* ── Browser frame: a scrollable window showing a full-page screenshot ──
+   (the live site blocks iframes via X-Frame-Options, so we frame the capture) */
+.browser-frame {
+  margin: 2rem 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.browser-frame-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--preview-bg);
+}
+
+.browser-frame-dots {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.browser-frame-dots span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.browser-frame-url {
+  flex: 1;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-muted, #7b7b7b);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browser-frame-live {
+  flex-shrink: 0;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+.browser-frame-live:hover { opacity: 1; }
+
+.browser-frame-viewport {
+  height: 460px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.browser-frame-viewport img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.browser-frame-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
+}
+
+.browser-frame-iframe {
+  display: block;
+  width: 100%;
+  height: 560px;
+  border: none;
+  background: var(--preview-bg);
+}
+
+/* ── Visible project link under the modal title ── */
+.modal-project-link {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: lowercase;
+  text-decoration: none;
+  color: var(--fg);
+  border: 1.5px solid var(--fg);
+  border-radius: 40px;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+.modal-project-link:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+/* ── Tech stack chips in the modal title row ── */
+.modal-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.modal-tech span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  background: var(--preview-bg);
+  opacity: 0.85;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+/* ── YouTube / video embed ── */
+.video-embed {
+  margin: 2rem 0;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+}
+.video-embed iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ── Highlighted results grid (outcome without image) ── */
+.modal-results {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 1.8rem 0;
+}
+
+.modal-results-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 22px;
+  background: var(--preview-bg);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.modal-results-num {
+  font-family: 'PP Editorial New', serif;
+  font-style: italic;
+  font-size: 13px;
+  opacity: 0.35;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.modal-results-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+@media (max-width: 700px) {
+  .modal-results { grid-template-columns: 1fr; }
+}
+
+/* ── CTA pill link (e.g. Figma prototype) ── */
+.modal-cta {
+  display: inline-block;
+  margin-top: 1.8rem;
+  padding: 14px 26px;
+  border: 1px solid var(--fg);
+  border-radius: 40px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--fg);
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.modal-cta:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
 /* ── Two-column layout ── */
 .modal-two-col {
   display: grid;
@@ -1245,10 +1490,10 @@ html, body {
 .modal-subsection { margin-bottom: 2.4rem; }
 
 .modal-subsection-title {
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   font-weight: 600;
   letter-spacing: -0.02em;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   opacity: 0.9;
 }
 
@@ -1300,13 +1545,13 @@ html, body {
 /* ── Closing quote ── */
 .modal-quote {
   border-left: 2px solid var(--fg);
-  padding: 4px 0 4px 20px;
-  margin: 2rem 0 0;
+  padding: 8px 0 8px 24px;
+  margin: 2.5rem 0 0;
   font-family: 'PP Editorial New', Georgia, serif;
   font-style: italic;
-  font-size: 1.1rem;
-  line-height: 1.55;
-  opacity: 0.55;
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  line-height: 1.45;
+  opacity: 0.85;
   max-width: 56ch;
 }
 
@@ -1358,44 +1603,124 @@ html, body {
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────────────── */
-@media (max-width: 900px) {
+
+/* Laptop / small desktop: narrower side rails */
+@media (max-width: 1100px) {
   .layout-grid {
-    grid-template-columns: 80px 1fr 40px;
+    grid-template-columns: 160px 1fr 70px;
   }
   .nav-grid {
-    grid-template-columns: 80px 1fr 40px;
+    grid-template-columns: 160px 1fr auto;
+  }
+  .nav-center { gap: 26px; }
+  .about-photo-container { width: 300px; }
+}
+
+/* Tablet & mobile: single column — side rails fold away */
+@media (max-width: 900px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+  }
+  .section-layout .col-left,
+  .section-layout .col-right {
+    display: none;
+  }
+  .col-center { grid-column: 1; }
+  .canvas-center { grid-column: 1; }
+
+  /* Nav: compact but complete */
+  .nav-grid {
+    grid-template-columns: auto 1fr auto;
   }
   .nav-left {
-    padding-left: 15px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    padding: 0 14px;
+    white-space: nowrap;
+    border-right: none;
   }
-  .nav-center {
-    gap: 20px;
+  .nav-center { gap: 12px; }
+  .nav-link {
+    font-size: 10px;
+    letter-spacing: 0.06em;
   }
-  .col-left {
-    padding: 30px 15px;
+  .nav-right {
+    padding: 0 10px;
+    gap: 8px;
   }
-  .left-bio {
-    display: none;
-  }
-  .right-jp-text {
-    font-size: 24px;
-  }
+  .lang-option { font-size: 9.5px; padding: 3px 3px; }
+  .theme-toggle-pill { width: 44px; height: 24px; }
+  .toggle-knob { width: 18px; height: 18px; }
+  .is-dark .toggle-knob { left: calc(100% - 21px); }
+
+  /* Hero */
+  .hero-top { top: 5%; left: 6%; right: 6%; }
+  .giant-heading { font-size: 15vw; }
+  .hero-tagline { font-size: 1.15rem; margin-top: 16px; }
+  .hero-date-corner { display: none; }
+  .hero-cta { left: 6%; bottom: 10%; }
+  .cta-btn { padding: 12px 20px; font-size: 10px; }
+
+  /* About: text on top, photo tucked bottom-right */
   .about-text-container {
-    max-width: 80%;
+    top: 6%;
+    left: 6%;
+    transform: none;
+    max-width: 88%;
   }
-  .section-headline {
-    font-size: 2.2rem;
+  .section-headline { font-size: clamp(1.9rem, 7vw, 2.6rem); margin-bottom: 18px; }
+  .bio-paragraph { font-size: 14px; line-height: 1.65; }
+  .about-photo-container {
+    top: auto;
+    bottom: 4%;
+    right: 6%;
+    transform: none;
+    width: min(44vw, 210px);
   }
-  .contact-headline {
-    font-size: 2.2rem;
-  }
+
+  /* Projects list: number · info · thumb (row itself is the tap target) */
   .project-row {
-    grid-template-columns: 30px 1fr 60px;
+    grid-template-columns: 34px 1fr 96px;
+    min-height: 96px;
   }
-  .project-tags {
-    display: none;
+  .project-open { display: none; }
+  .project-num { font-size: 13px; padding-left: 6px; }
+  .project-name { font-size: 17px; }
+  .project-main { padding: 14px 12px 14px 0; gap: 6px; }
+  .project-tag { font-size: 8px; }
+  .project-hover-preview { display: none; }
+
+  /* Contact */
+  .contact-container { left: 6%; width: 88%; }
+  .contact-headline { font-size: clamp(2rem, 8vw, 2.6rem); margin-bottom: 32px; }
+  .contact-links { gap: 18px; padding-top: 22px; }
+  .link-item { grid-template-columns: 84px 1fr; }
+  .contact-link { font-size: 15px; word-break: break-word; }
+}
+
+/* Phones: tighter type & full-bleed modal */
+@media (max-width: 700px) {
+  .nav-center { gap: 10px; }
+  .nav-link { font-size: 9.5px; letter-spacing: 0.05em; }
+  .nav-left { font-size: 11px; padding: 0 10px; }
+
+  .modal-panel {
+    max-height: 96vh;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
   }
-  .project-name {
-    font-size: 18px;
-  }
+  .modal-two-col { grid-template-columns: 1fr; gap: 1.6rem; }
+  .modal-personas { grid-template-columns: 1fr; }
+  .modal-media--half { flex-direction: column; }
+  .modal-media--half .modal-media-slot { aspect-ratio: 16 / 10; }
+  .modal-media--doc .modal-media-slot { max-width: 100%; }
+  .modal-media--portrait { gap: 10px; }
+  .modal-media--portrait .modal-media-slot { max-width: none; }
+  .browser-frame-iframe { height: 420px; }
+  .browser-frame-viewport { height: 380px; }
+  .modal-content-text p { font-size: 1rem; }
+  .modal-list li { font-size: 0.95rem; }
+  .modal-tech { gap: 6px; margin-top: 14px; }
+  .modal-tech span { font-size: 10px; padding: 5px 11px; }
+  .modal-quote { font-size: 1.25rem; padding-left: 18px; }
 }

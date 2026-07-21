@@ -1,7 +1,9 @@
 // ProjectRow.jsx
 // A single row in the projects list. Receives project data as props.
-export default function ProjectRow({ num, name, tags, year, image, onClick }) {
+// `thumb` is the row cover; falls back to `image` (the modal cover) if absent.
+export default function ProjectRow({ num, name, tags, year, image, thumb, onClick }) {
   const tagList = tags.split(' / ')
+  const cover = thumb || image
 
   return (
     <div className="project-row" onClick={onClick}>
@@ -16,7 +18,7 @@ export default function ProjectRow({ num, name, tags, year, image, onClick }) {
         </div>
       </div>
       <div className="project-thumb">
-        {image && <img src={image} alt={name} />}
+        {cover && <img src={cover} alt={name} />}
       </div>
       <button className="project-open" aria-label="Open project">+</button>
     </div>

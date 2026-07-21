@@ -1,6 +1,21 @@
 // SectionAbout.jsx
 // The "about me" section. Two info lists on the left, bio paragraph in the center.
+import { Fragment } from 'react'
+import { useT } from '../i18n.jsx'
+
+// Render a string with "\n" as <br/> line breaks.
+function withBreaks(text) {
+  const parts = text.split('\n')
+  return parts.map((part, i) => (
+    <Fragment key={i}>
+      {part}
+      {i < parts.length - 1 && <br />}
+    </Fragment>
+  ))
+}
+
 export default function SectionAbout() {
+  const t = useT()
   return (
     <section id="sec-2" className="section-layout layout-grid">
 
@@ -8,17 +23,14 @@ export default function SectionAbout() {
         <div className="sec-num">02</div>
         <div className="left-info-block">
           <div className="info-group">
-            <h4>FOCUS</h4>
+            <h4>{t.about.focus}</h4>
             <ul>
-              <li>UX Design</li>
-              <li>Interaction</li>
-              <li>Systems</li>
-              <li>Frontend</li>
+              {t.about.focusItems.map((item) => <li key={item}>{item}</li>)}
             </ul>
           </div>
           <div className="divider-dash">—</div>
           <div className="info-group">
-            <h4>TOOLS</h4>
+            <h4>{t.about.tools}</h4>
             <ul>
               <li>Figma</li>
               <li>Framer</li>
@@ -33,13 +45,10 @@ export default function SectionAbout() {
       <div className="col-center">
         <div className="about-text-container">
           <h2 className="section-headline">
-            Precision in<br />every <em>detail.</em>
+            {withBreaks(t.about.headlinePre)}<em>{t.about.headlineEm}</em>
           </h2>
           <p className="bio-paragraph">
-            I believe UX design is not just about how things look, but how they function,
-            adapt, and feel. My work lies at the intersection of systematic logic and human
-            emotion, translating complex technical frameworks into simple, intuitive, and
-            delightful digital experiences.
+            {t.about.bio}
           </p>
         </div>
         <div className="about-photo-container">

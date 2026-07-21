@@ -5,7 +5,7 @@
 export default function HoverPreview() {
   return (
     <div className="project-hover-preview" id="hover-preview">
-      <img src="" alt="Project Preview" />
+      <img alt="Project Preview" />
     </div>
   )
 }

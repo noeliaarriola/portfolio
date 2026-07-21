@@ -1,29 +1,31 @@
 // SectionHome.jsx
 // The landing section. Full viewport, editorial layout with large heading.
+// The H1 "THINKING WHILE BUILDING." stays in English across all languages (brand).
 // Japanese text translates roughly to: "Experience Design / Simplicity and Human-Centered Design"
+import { Fragment } from 'react'
+import { useT } from '../i18n.jsx'
+
 export default function SectionHome() {
+  const t = useT()
   return (
     <section id="sec-1" className="section-layout layout-grid">
 
       <div className="col-left">
         <div className="sec-num">01</div>
         <div className="left-bio">
-          <span>UX DESIGNER</span>
-          <span className="dot">•</span>
-          <span>COMPUTER SCIENCE</span>
-          <span className="dot">•</span>
-          <span>Argentinian</span>
-          <span className="dot">•</span>
-          <span>Based in Brazil</span>
-          <span className="dot">•</span>
-          <span>Always learning</span>
+          {t.home.chips.map((chip, i) => (
+            <Fragment key={i}>
+              <span>{chip}</span>
+              {i < t.home.chips.length - 1 && <span className="dot">•</span>}
+            </Fragment>
+          ))}
         </div>
         <div className="bottom-dot">●</div>
       </div>
 
       <div className="col-center">
         <div className="hero-date-corner">
-          {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: '2-digit' })}
+          {new Date().toLocaleDateString(t.dateLocale, { year: 'numeric', month: 'long', day: '2-digit' })}
         </div>
         <div className="hero-top">
           <h1 className="giant-heading">
@@ -31,12 +33,12 @@ export default function SectionHome() {
             <span className="word">WHILE</span><br />
             <span className="word">BUILDING.</span>
           </h1>
-          <p className="hero-tagline">A UX Design Portfolio by Noelia Limp A.</p>
+          <p className="hero-tagline">{t.home.tagline}</p>
         </div>
 
         <div className="hero-cta">
-          <button id="cta-view-work" className="cta-btn cta-primary">VIEW WORK ↓</button>
-          <button id="cta-contact" className="cta-btn cta-secondary">CONTACT</button>
+          <button id="cta-view-work" className="cta-btn cta-primary">{t.home.viewWork}</button>
+          <button id="cta-contact" className="cta-btn cta-secondary">{t.home.contact}</button>
         </div>
       </div>
 

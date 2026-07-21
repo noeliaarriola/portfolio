@@ -103,6 +103,21 @@ export default function ProjectModal({ project, onClose }) {
           {project.subtitle && (
             <p className="modal-subtitle">{project.subtitle}</p>
           )}
+          {project.tech && (
+            <div className="modal-tech">
+              {project.tech.map((t) => <span key={t}>{t}</span>)}
+            </div>
+          )}
+          {project.link && (
+            <a
+              className="modal-project-link"
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {project.link.replace(/^https?:\/\//, '').replace(/\/$/, '')} ↗
+            </a>
+          )}
         </div>
 
         {/* ── Cover image placeholder ── */}
