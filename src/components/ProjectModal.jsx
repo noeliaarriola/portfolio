@@ -12,19 +12,22 @@
 //   content.decisions → Key Design Decisions
 //   content.outcome   → The Outcome
 import { useEffect, useRef } from 'react'
+import { useT, useLang } from '../i18n.jsx'
 
-// title: the bold DM Sans part
-// accent: the PP Editorial New italic word appended after
-const SECTIONS = [
-  { key: 'problem',   num: '01', label: 'Product',        title: 'The Problem',         accent: 'Worth Solving' },
-  { key: 'role',      num: '02', label: 'Team & Process', title: 'My Role &',            accent: 'Contribution' },
-  { key: 'decisions', num: '03', label: 'Design Craft',   title: 'Key Design',           accent: 'Decisions' },
-  { key: 'outcome',   num: '04', label: 'Impact',         title: 'The',                  accent: 'Outcome' },
-]
+const SECTION_KEYS = ['problem', 'role', 'decisions', 'outcome']
+const SECTION_NUMS = { problem: '01', role: '02', decisions: '03', outcome: '04' }
 
 export default function ProjectModal({ project, onClose }) {
   const overlayRef = useRef()
   const panelRef   = useRef()
+  const t = useT()
+  const { lang } = useLang()
+
+  // Content can be flat ({problem,role,...}) or per-language ({en:{...},es,pt}).
+  // Fall back to English when a language hasn't been translated yet.
+  const body = project?.content?.en
+    ? (project.content[lang] || project.content.en)
+    : project?.content
 
   // Animate in when project changes to a non-null value
   useEffect(() => {
@@ -129,30 +132,33 @@ export default function ProjectModal({ project, onClose }) {
 
         {/* ── 4-section body ── */}
         <div className="modal-body">
-          {SECTIONS.map(({ key, num, label, title, accent }) => (
-            <div className="modal-section" key={key}>
-              <div className="modal-section-header">
-                <span className="modal-section-num">{num}</span>
-                <span className="modal-section-label">{label}</span>
+          {SECTION_KEYS.map((key) => {
+            const s = t.modal.sections[key]
+            return (
+              <div className="modal-section" key={key}>
+                <div className="modal-section-header">
+                  <span className="modal-section-num">{SECTION_NUMS[key]}</span>
+                  <span className="modal-section-label">{s.label}</span>
+                </div>
+                <h3 className="modal-section-title">
+                  {s.title} <em>{s.accent}</em>
+                </h3>
+                <div className="modal-section-divider" />
+                <div className="modal-section-text">
+                  {body?.[key]
+                    ? body[key]
+                    : <span className="modal-placeholder">{t.modal.soon}</span>
+                  }
+                </div>
               </div>
-              <h3 className="modal-section-title">
-                {title} <em>{accent}</em>
-              </h3>
-              <div className="modal-section-divider" />
-              <div className="modal-section-text">
-                {project.content?.[key]
-                  ? project.content[key]
-                  : <span className="modal-placeholder">— Content coming soon</span>
-                }
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* ── Footer close ── */}
         <div className="modal-footer">
           <button className="modal-footer-close" onClick={handleClose}>
-            Close ✕
+            {t.modal.close}
           </button>
         </div>
 

@@ -1,40 +1,8 @@
-/* PP Editorial New */
-@font-face {
-  font-family: 'PP Editorial New';
-  src: url('/assets/Fonts/PPEditorialNew-Regular.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'PP Editorial New';
-  src: url('/assets/Fonts/PPEditorialNew-Italic.otf') format('opentype');
-  font-weight: 400;
-  font-style: italic;
-}
-@font-face {
-  font-family: 'PP Editorial New';
-  src: url('/assets/Fonts/PPEditorialNew-Ultralight.otf') format('opentype');
-  font-weight: 200;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'PP Editorial New';
-  src: url('/assets/Fonts/PPEditorialNew-UltralightItalic.otf') format('opentype');
-  font-weight: 200;
-  font-style: italic;
-}
-@font-face {
-  font-family: 'PP Editorial New';
-  src: url('/assets/Fonts/PPEditorialNew-Ultrabold.otf') format('opentype');
-  font-weight: 800;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'PP Editorial New';
-  src: url('/assets/Fonts/PPEditorialNew-UltraboldItalic.otf') format('opentype');
-  font-weight: 800;
-  font-style: italic;
-}
+/* PP Editorial New — the .otf files are not in the repo, so these @font-face rules
+   were firing 6 requests that never resolved (~500 ms each) and fell back anyway.
+   The editorial serif below is the system fallback, which is what has been rendering.
+   To use the real family: drop the .otf files in public/assets/Fonts/ and restore
+   the @font-face declarations here. */
 
 /* ── Theme Tokens ──────────────────────────────────────────────────────────── */
 :root {
@@ -208,6 +176,37 @@ html, body {
 .lang-option:hover { opacity: 0.7; }
 
 .lang-option.is-active { opacity: 1; }
+
+/* Language switch placement: bar on desktop, inside the menu on mobile */
+.nav-bar-lang { display: flex; }
+.nav-menu-lang { display: none; }
+
+/* ── Hamburger (mobile only) ── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-hamburger span {
+  display: block;
+  width: 20px;
+  height: 1.5px;
+  margin: 0 auto;
+  background: var(--fg);
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, background 0.3s ease;
+}
+
+.nav-hamburger.is-open span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+.nav-hamburger.is-open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.is-open span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
 
 /* ── Theme Toggle ───────────────────────────────────────────────────────────── */
 /* Theme toggle pill */
@@ -1628,9 +1627,10 @@ html, body {
   .col-center { grid-column: 1; }
   .canvas-center { grid-column: 1; }
 
-  /* Nav: compact but complete */
+  /* Nav: wordmark + theme + hamburger. The links move into a dropdown panel. */
   .nav-grid {
     grid-template-columns: auto 1fr auto;
+    position: relative;
   }
   .nav-left {
     font-size: 12px;
@@ -1639,19 +1639,60 @@ html, body {
     white-space: nowrap;
     border-right: none;
   }
-  .nav-center { gap: 12px; }
-  .nav-link {
-    font-size: 10px;
-    letter-spacing: 0.06em;
-  }
   .nav-right {
-    padding: 0 10px;
-    gap: 8px;
+    padding: 0 12px;
+    gap: 10px;
   }
-  .lang-option { font-size: 9.5px; padding: 3px 3px; }
+  .nav-hamburger { display: flex; }
+  .nav-bar-lang { display: none; }
+  .nav-menu-lang {
+    display: flex;
+    justify-content: center;
+    margin-top: 6px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
   .theme-toggle-pill { width: 44px; height: 24px; }
   .toggle-knob { width: 18px; height: 18px; }
   .is-dark .toggle-knob { left: calc(100% - 21px); }
+
+  /* Dropdown panel */
+  .nav-center {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 6px 0 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.10);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity 0.26s ease, transform 0.26s ease, visibility 0.26s;
+  }
+  .nav-grid.is-open .nav-center {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .nav-link {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    padding: 15px 20px;
+    text-align: center;
+    width: 100%;
+  }
+  .nav-link::after { display: none; }
+  .nav-link.active { opacity: 1; }
+  .lang-option { font-size: 11px; padding: 4px 9px; }
 
   /* Hero */
   .hero-top { top: 5%; left: 6%; right: 6%; }
@@ -1700,9 +1741,7 @@ html, body {
 
 /* Phones: tighter type & full-bleed modal */
 @media (max-width: 700px) {
-  .nav-center { gap: 10px; }
-  .nav-link { font-size: 9.5px; letter-spacing: 0.05em; }
-  .nav-left { font-size: 11px; padding: 0 10px; }
+  .nav-left { font-size: 11px; padding: 0 12px; }
 
   .modal-panel {
     max-height: 96vh;

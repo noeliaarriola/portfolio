@@ -59,6 +59,16 @@ const DICT = {
       'UX RESEARCH': 'UX RESEARCH',
       'PRODUCT STRATEGY': 'PRODUCT STRATEGY',
     },
+    modal: {
+      sections: {
+        problem:   { label: 'Product',        title: 'The Problem', accent: 'Worth Solving' },
+        role:      { label: 'Team & Process', title: 'My Role &',   accent: 'Contribution' },
+        decisions: { label: 'Design Craft',   title: 'Key Design',  accent: 'Decisions' },
+        outcome:   { label: 'Impact',         title: 'The',         accent: 'Outcome' },
+      },
+      soon: '— Content coming soon',
+      close: 'Close ✕',
+    },
   },
 
   es: {
@@ -67,7 +77,7 @@ const DICT = {
     nav: { home: 'INICIO', about: 'SOBRE', projects: 'PROYECTOS', contact: 'CONTACTO' },
     home: {
       chips: ['DISEÑADORA UX', 'CIENCIAS DE LA COMPUTACIÓN', 'Argentina', 'Radicada en Brasil', 'Siempre aprendiendo'],
-      tagline: 'Un portafolio de diseño UX por Noelia Limp A.',
+      tagline: 'Un portfolio de diseño UX creado por Noelia Limp A.',
       viewWork: 'VER TRABAJO ↓',
       contact: 'CONTACTO',
     },
@@ -114,6 +124,16 @@ const DICT = {
       'UX RESEARCH': 'INVESTIGACIÓN UX',
       'PRODUCT STRATEGY': 'ESTRATEGIA DE PRODUCTO',
     },
+    modal: {
+      sections: {
+        problem:   { label: 'Producto',           title: 'El Problema', accent: 'a Resolver' },
+        role:      { label: 'Equipo y Proceso',   title: 'Mi Rol y',    accent: 'Contribución' },
+        decisions: { label: 'Craft de Diseño',    title: 'Decisiones de', accent: 'Diseño Clave' },
+        outcome:   { label: 'Impacto',            title: 'El',          accent: 'Resultado' },
+      },
+      soon: '— Contenido próximamente',
+      close: 'Cerrar ✕',
+    },
   },
 
   pt: {
@@ -122,7 +142,7 @@ const DICT = {
     nav: { home: 'INÍCIO', about: 'SOBRE', projects: 'PROJETOS', contact: 'CONTATO' },
     home: {
       chips: ['DESIGNER UX', 'CIÊNCIA DA COMPUTAÇÃO', 'Argentina', 'Radicada no Brasil', 'Sempre aprendendo'],
-      tagline: 'Um portfólio de design UX por Noelia Limp A.',
+      tagline: 'Um portfólio de UX Design, feito por Noelia Limp A.',
       viewWork: 'VER TRABALHOS ↓',
       contact: 'CONTATO',
     },
@@ -168,6 +188,16 @@ const DICT = {
       'FRONTEND': 'FRONTEND',
       'UX RESEARCH': 'PESQUISA UX',
       'PRODUCT STRATEGY': 'ESTRATÉGIA DE PRODUTO',
+    },
+    modal: {
+      sections: {
+        problem:   { label: 'Produto',            title: 'O Problema', accent: 'a Resolver' },
+        role:      { label: 'Equipe e Processo',  title: 'Meu Papel e', accent: 'Contribuição' },
+        decisions: { label: 'Craft de Design',    title: 'Principais Decisões', accent: 'de Design' },
+        outcome:   { label: 'Impacto',            title: 'O',          accent: 'Resultado' },
+      },
+      soon: '— Conteúdo em breve',
+      close: 'Fechar ✕',
     },
   },
 }

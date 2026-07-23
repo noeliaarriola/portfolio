@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import Nav from './components/Nav'
 import SectionHome from './sections/SectionHome'
 import SectionAbout from './sections/SectionAbout'
@@ -11,25 +10,6 @@ import useProfileEffect from './hooks/useProfileEffect'
 export default function App() {
   useScrollAnimations()
   useProfileEffect()
-
-  // Fade out the loading screen once fonts are ready (min 1.4s so the bar completes)
-  useEffect(() => {
-    const loader = document.getElementById('app-loader')
-    if (!loader) return
-    const minTime  = new Promise(r => setTimeout(r, 1500))
-    const fonts    = document.fonts ? document.fonts.ready : Promise.resolve()
-    Promise.all([minTime, fonts]).then(() => {
-      const { gsap } = window
-      if (gsap) {
-        gsap.to(loader, { autoAlpha: 0, duration: 0.55, ease: 'power2.inOut',
-          onComplete: () => loader.remove() })
-      } else {
-        loader.style.opacity = '0'
-        loader.style.transition = 'opacity 0.55s'
-        setTimeout(() => loader.remove(), 600)
-      }
-    })
-  }, [])
 
   return (
     <>

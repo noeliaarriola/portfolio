@@ -7,6 +7,14 @@ export default function useScrollAnimations() {
 
     if (!THREE || !gsap) {
       console.warn('Three.js or GSAP not found. Check index.html script tags.')
+      // Failsafe: the hero starts hidden in CSS for the entrance animation.
+      // Without GSAP it would stay invisible, so reveal it directly.
+      document
+        .querySelectorAll('.giant-heading .word, .hero-tagline, .hero-cta')
+        .forEach((el) => {
+          el.style.opacity = '1'
+          el.style.transform = 'none'
+        })
       return
     }
 
