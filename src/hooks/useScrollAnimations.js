@@ -343,6 +343,16 @@ export default function useScrollAnimations() {
   .to('#sec-3', { autoAlpha: 0, y: -30, duration: 1 }, 6.6)
   .to('#sec-4', { autoAlpha: 1, y: 0, duration: 1 }, 7.1)
 
+    // ScrollTrigger measures '.scroll-height-holder' height synchronously
+    // right here — but web fonts and project-thumbnail images can still be
+    // loading at this point and change page height afterward, leaving the
+    // trigger's cached end position stale (progress then never advances
+    // past 0, no matter how much the user scrolls). Refresh once now and
+    // again after everything has actually finished loading.
+    ScrollTrigger.refresh()
+    const onWindowLoad = () => ScrollTrigger.refresh()
+    window.addEventListener('load', onWindowLoad)
+
     // ─── Nav: Active Link + Smooth Scroll ────────────────────────────────────
     const navLinks = [
       document.getElementById('link-home'),
@@ -408,6 +418,7 @@ export default function useScrollAnimations() {
       })
       document.removeEventListener('themechange', onThemeChange)
       window.removeEventListener('resize', onResize)
+      window.removeEventListener('load', onWindowLoad)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('scroll', onScroll)
       ctaViewWork?.removeEventListener('click', onCtaViewWork)
