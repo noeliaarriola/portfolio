@@ -48,6 +48,12 @@ export default function ProjectModal({ project, onClose }) {
 
     return () => {
       document.documentElement.style.overflow = ''
+      // Locking/unlocking overflow can remove or restore the scrollbar,
+      // shifting layout width slightly — enough to desync ScrollTrigger's
+      // cached page-height measurement (same class of issue as on initial
+      // load; see useScrollAnimations.js). Refresh it so the main page's
+      // scroll animation doesn't go stale after visiting a project.
+      window.ScrollTrigger?.refresh()
     }
   }, [project])
 
@@ -66,7 +72,10 @@ export default function ProjectModal({ project, onClose }) {
       autoAlpha: 0,
       duration: 0.35,
       delay: 0.18,
-      onComplete: onClose,
+      onComplete: () => {
+        onClose()
+        window.ScrollTrigger?.refresh()
+      },
     })
   }
 
