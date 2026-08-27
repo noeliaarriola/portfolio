@@ -46,17 +46,6 @@ export default function SectionContact() {
                 linkedin.com/in/noelialimp ↗
               </a>
             </div>
-            <div className="link-item">
-              <span className="link-label">{t.contact.behance}</span>
-              <a
-                href="https://behance.net/noela"
-                target="_blank"
-                rel="noreferrer"
-                className="contact-link"
-              >
-                behance.net/noela ↗
-              </a>
-            </div>
           </div>
         </div>
       </div>

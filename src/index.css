@@ -45,7 +45,7 @@ html, body {
 
 /* ── Scroll Container ───────────────────────────────────────────────────────── */
 .scroll-height-holder {
-  height: 500vh;
+  height: 600vh;
   position: relative;
   width: 100%;
 }

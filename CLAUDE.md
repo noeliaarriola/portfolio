@@ -19,7 +19,7 @@ This is a React 19 + Vite single-page portfolio. Three.js and GSAP (including Sc
 
 ### Scroll-based animation pattern
 
-The entire site uses a "scroll-height-holder" pattern: a `500vh` tall `<div>` creates scroll distance while a `position: fixed` `sticky-viewport` stays on screen. GSAP `ScrollTrigger` scrubs through a master timeline as the user scrolls, cross-fading between four stacked sections (`#sec-1` through `#sec-4`).
+The entire site uses a "scroll-height-holder" pattern: a `600vh` tall `<div>` creates scroll distance while a `position: fixed` `sticky-viewport` stays on screen. GSAP `ScrollTrigger` scrubs through a master timeline as the user scrolls, cross-fading between four stacked sections (`#sec-1` through `#sec-4`).
 
 All animation logic — Three.js scene setup, the GSAP scroll timeline, nav highlighting, smooth-scroll on nav click, and the hover preview — lives in a single hook: `src/hooks/useScrollAnimations.js`. This hook is called once in `App.jsx` and runs after the first render (empty `useEffect` dependency array). The cleanup function in the hook handles React StrictMode's double-mount in dev.
 
@@ -41,4 +41,4 @@ Project entries live as a plain array constant (`PROJECTS`) at the top of `src/s
 
 ### Nav scroll targets
 
-Nav links use scroll-fraction targets defined in `useScrollAnimations.js` (the `targets` array: `[0, 0.35, 0.68, 1]`). If the scroll timeline durations change, these fractions may need adjustment.
+Nav links use scroll-fraction targets defined in `useScrollAnimations.js` (the `targets` array: `[0, 0.22, 0.62, 1]`). If the scroll timeline durations change, these fractions may need adjustment.
