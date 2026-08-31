@@ -71,14 +71,16 @@ export default function useScrollAnimations() {
     let craneBaseX = 0, craneBaseY = 0
     let craneLoadStarted = false
 
-    // Building the wireframe (edge de-dup over ~900K triangles) is the actual
-    // heavy step — even one mesh at a time, the biggest mesh alone is enough
-    // to cause a visible stall. Split every mesh into small triangle chunks,
-    // then each animation frame processes as many chunks as fit in a small
-    // time budget (instead of a fixed 1-chunk-per-frame, which was smooth but
-    // wasted most of every 16ms frame doing nothing and took ~2s+ wall time
-    // to finish). This keeps frames unblocked while finishing much sooner.
-    const CRANE_TRIS_PER_CHUNK = 6000
+    // WireframeGeometry (the previous approach) keeps every single triangle
+    // edge — for this mesh's ~900K triangles that's several million line
+    // vertices, tens of MB of intermediate typed arrays held in memory all
+    // at once. That's almost certainly what was crashing the tab. Switching
+    // to EdgesGeometry keeps only edges between faces that actually meet at
+    // an angle (real creases) and silently discards the flat internal
+    // triangulation — for a faceted origami model that's a small fraction
+    // of the geometry, and it's the more correct look besides (fold lines,
+    // not every internal triangle diagonal). Cheap enough to do one mesh
+    // per animation frame with no further splitting needed.
     const CRANE_FRAME_BUDGET_MS = 8
     let craneRafId = null
 
@@ -94,55 +96,19 @@ export default function useScrollAnimations() {
         })
         if (!meshNodes.length) return
 
-        // Flatten into a queue of small triangle-range chunks, mesh by mesh.
-        const chunks = []
-        meshNodes.forEach((node) => {
-          const idx = node.geometry.index
-          const triCount = idx ? idx.count / 3 : node.geometry.attributes.position.count / 3
-          for (let t = 0; t < triCount; t += CRANE_TRIS_PER_CHUNK) {
-            chunks.push({ node, triStart: t, triEnd: Math.min(t + CRANE_TRIS_PER_CHUNK, triCount) })
-          }
-        })
-
         const rawArrays = []
         let minX = Infinity, maxX = -Infinity
         let minY = Infinity, maxY = -Infinity
         let minZ = Infinity, maxZ = -Infinity
-        let chunkIndex = 0
-        // Cache each mesh's world-transformed geometry so it's computed once,
-        // not once per chunk — cheap relative to WireframeGeometry, but no
-        // reason to redo it.
-        const transformedCache = new Map()
+        let meshIndex = 0
 
-        const getTransformed = (node) => {
-          let geom = transformedCache.get(node)
-          if (!geom) {
-            geom = node.geometry.clone().applyMatrix4(node.matrixWorld)
-            transformedCache.set(node, geom)
-          }
-          return geom
-        }
-
-        const processOneChunk = () => {
-          const { node, triStart, triEnd } = chunks[chunkIndex]
+        const processOneMesh = () => {
+          const node = meshNodes[meshIndex]
           try {
-            const geom = getTransformed(node)
-            const fullIndex = geom.index
-            const chunkGeom = new THREE.BufferGeometry()
-            chunkGeom.setAttribute('position', geom.attributes.position)
-            if (fullIndex) {
-              chunkGeom.setIndex(new THREE.BufferAttribute(fullIndex.array.slice(triStart * 3, triEnd * 3), 1))
-            } else {
-              const posArr = geom.attributes.position.array.slice(triStart * 9, triEnd * 9)
-              chunkGeom.setAttribute('position', new THREE.BufferAttribute(posArr, 3))
-            }
-            // WireframeGeometry always produces edges regardless of vertex sharing.
-            // Edges that straddle two chunks get deduped within each chunk only,
-            // not across chunks — at this granularity that's an invisible seam.
-            const wire = new THREE.WireframeGeometry(chunkGeom)
-            const arr = wire.attributes.position.array
-            // Read the typed array directly (no getX/getY/getZ accessor calls —
-            // this loop alone runs millions of times across the whole model)
+            const geom = node.geometry.clone().applyMatrix4(node.matrixWorld)
+            const edges = new THREE.EdgesGeometry(geom, 1)
+            const arr = edges.attributes.position.array
+            // Read the typed array directly (no getX/getY/getZ accessor calls)
             for (let i = 0; i < arr.length; i += 3) {
               const x = arr[i], y = arr[i + 1], z = arr[i + 2]
               if (x < minX) minX = x; if (x > maxX) maxX = x
@@ -150,27 +116,18 @@ export default function useScrollAnimations() {
               if (z < minZ) minZ = z; if (z > maxZ) maxZ = z
             }
             rawArrays.push(arr)
-            wire.dispose()
-            chunkGeom.dispose()
-          } catch (_) { /* skip incompatible chunk */ }
-
-          chunkIndex++
-          const stillNeeded = chunkIndex < chunks.length && chunks[chunkIndex].node === node
-          if (!stillNeeded) {
-            const cached = transformedCache.get(node)
-            if (cached) { cached.dispose(); transformedCache.delete(node) }
-          }
+            edges.dispose()
+            geom.dispose()
+          } catch (_) { /* skip incompatible mesh */ }
+          meshIndex++
         }
 
         const processFrame = () => {
           const frameStart = performance.now()
-          // Keep chewing through chunks until the frame budget runs out, instead
-          // of always waiting for the next rAF after just one — most chunks are
-          // cheap, so this finishes in a handful of frames instead of ~150.
-          while (chunkIndex < chunks.length && performance.now() - frameStart < CRANE_FRAME_BUDGET_MS) {
-            processOneChunk()
+          while (meshIndex < meshNodes.length && performance.now() - frameStart < CRANE_FRAME_BUDGET_MS) {
+            processOneMesh()
           }
-          if (chunkIndex < chunks.length) {
+          if (meshIndex < meshNodes.length) {
             craneRafId = requestAnimationFrame(processFrame)
           } else {
             finalizeCrane()
