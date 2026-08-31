@@ -955,6 +955,10 @@ html, body {
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  /* Without this, scrolling to the very top/bottom of the panel "chains"
+     into the page behind it (rubber-band bounce), which flashes/flickers
+     since the page itself is scroll-locked while the modal is open. */
+  overscroll-behavior: contain;
   /* scrollbar thin */
   scrollbar-width: thin;
   scrollbar-color: var(--border-15) transparent;
