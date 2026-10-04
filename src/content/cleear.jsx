@@ -28,7 +28,7 @@ const STR = {
       p1: 'I worked on transforming the brand’s digital experience by combining **UX structure, visual strategy, and interface design**.',
       p2: 'The project required both defining a **clearer brand direction** and building a shopping experience that could **reduce the dependency on manual sales channels**.',
       contributionsTitle: 'Contributions',
-      contributions: ['E-commerce structure', 'User flow organization', 'Product presentation', 'Brand direction', 'UI design', 'Responsive experience'],
+      contributions: ['E-commerce structure', 'User flow organization', 'Product presentation', 'Brand direction', 'UI design', 'Responsive experience', 'Shopify store setup'],
       processTitle: 'Process',
       process: ['Brand analysis', 'Structure', 'Visual direction', 'UI design'],
     },
@@ -75,7 +75,7 @@ const STR = {
       p1: 'Trabajé en transformar la experiencia digital de la marca combinando **estructura UX, estrategia visual y diseño de interfaz**.',
       p2: 'El proyecto requería tanto definir una **dirección de marca más clara** como construir una experiencia de compra que pudiera **reducir la dependencia de los canales de venta manuales**.',
       contributionsTitle: 'Contribuciones',
-      contributions: ['Estructura de e-commerce', 'Organización del flujo de usuario', 'Presentación de productos', 'Dirección de marca', 'Diseño UI', 'Experiencia responsiva'],
+      contributions: ['Estructura de e-commerce', 'Organización del flujo de usuario', 'Presentación de productos', 'Dirección de marca', 'Diseño UI', 'Experiencia responsiva', 'Configuración de la tienda en Shopify'],
       processTitle: 'Proceso',
       process: ['Análisis de marca', 'Estructura', 'Dirección visual', 'Diseño UI'],
     },
@@ -122,7 +122,7 @@ const STR = {
       p1: 'Trabalhei na transformação da experiência digital da marca combinando **estrutura UX, estratégia visual e design de interface**.',
       p2: 'O projeto exigia tanto definir uma **direção de marca mais clara** quanto construir uma experiência de compra capaz de **reduzir a dependência dos canais de venda manuais**.',
       contributionsTitle: 'Contribuições',
-      contributions: ['Estrutura de e-commerce', 'Organização do fluxo do usuário', 'Apresentação de produtos', 'Direção de marca', 'Design de UI', 'Experiência responsiva'],
+      contributions: ['Estrutura de e-commerce', 'Organização do fluxo do usuário', 'Apresentação de produtos', 'Direção de marca', 'Design de UI', 'Experiência responsiva', 'Configuração da loja na Shopify'],
       processTitle: 'Processo',
       process: ['Análise da marca', 'Estrutura', 'Direção visual', 'Design de UI'],
     },
@@ -237,11 +237,6 @@ function build(s) {
           </ul>
         </div>
 
-        <figure className="modal-media modal-media--portrait">
-          <div className="modal-media-slot"><img src="/media/cleear-mobile-hero.jpg" alt="Cleear Cosmetics — mobile homepage" /></div>
-          <div className="modal-media-slot"><img src="/media/cleear-mobile-produtos.jpg" alt="Cleear Cosmetics — mobile product cards" /></div>
-        </figure>
-
         <div className="modal-subsection">
           <h4 className="modal-subsection-title">{s.decisions.sub3Title}</h4>
           <P text={s.decisions.sub3p} />
@@ -254,10 +249,6 @@ function build(s) {
             accent="#B69D62" /* Cleear gold, from the brand's design system */
           />
         </div>
-
-        <figure className="modal-media">
-          <div className="modal-media-slot"><img src="/media/cleear-produtos.jpg" alt="Cleear Cosmetics — featured products grid" /></div>
-        </figure>
       </div>
     ),
 

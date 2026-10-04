@@ -47,7 +47,7 @@ const PROJECTS = [
     subtitle: 'Creating a cohesive e-commerce experience for a growing beauty brand',
     tags: 'E-COMMERCE DESIGN / UI DESIGN / BRAND FOUNDATION / RESPONSIVE',
     year: '2024',
-    tech: ['Figma', 'Shopify', 'Design Tokens'],
+    tech: ['Figma', 'Adobe Illustrator', 'Design System', 'Shopify', 'E-commerce Setup'],
     thumb: '/media/cleear-cover.png',
     image: '/media/cleear-desktop-poster.jpg', // poster shown while the cover video loads
     video: '/media/cleear-desktop.mp4',
