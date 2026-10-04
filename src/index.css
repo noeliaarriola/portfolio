@@ -1063,7 +1063,8 @@ html, body {
   transition: background 0.3s ease;
 }
 
-.modal-cover img {
+.modal-cover img,
+.modal-cover video {
   /* natural ratio — show the full screenshot, never crop it */
   width: 100%;
   height: auto;
@@ -1255,7 +1256,8 @@ html, body {
 
 /* Full: show the whole image at its natural ratio (no crop) — for tall design docs */
 .modal-media--full .modal-media-slot { aspect-ratio: auto; }
-.modal-media--full .modal-media-slot img { height: auto; object-fit: contain; }
+.modal-media--full .modal-media-slot img,
+.modal-media--full .modal-media-slot video { height: auto; object-fit: contain; }
 
 /* Doc: natural ratio but displayed narrower, so 1x exports stay sharp */
 .modal-media--doc .modal-media-slot { aspect-ratio: auto; max-width: 720px; }
@@ -1488,6 +1490,288 @@ html, body {
 }
 
 .modal-process-arrow { opacity: 0.3; }
+
+/* ── Journey diagram (JourneyDiagram.jsx) ──
+   Before / after purchase journey as two swimlanes (customer row, brand band).
+   Base styles are the vertical timeline (narrow figure); the horizontal layout
+   kicks in when the figure itself is 940px or wider (container query).
+   Geometry arrives as inline variables from the component: --row (step height,
+   narrow), --yc / --yb / --h (row positions and plot height, wide), --i (step
+   index). --journey-accent is the optional brand color of the "after" path. */
+.journey {
+  container: journey / inline-size;
+  margin: 2rem 0;
+}
+
+.journey-frame {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 20px;
+  transition: border-color 0.3s ease;
+}
+
+.journey-lane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px 0;
+}
+
+.journey-lane + .journey-lane { border-top: 1px solid var(--border); }
+
+.journey-side {
+  display: flex;
+  flex-direction: column;
+}
+
+.journey-tag,
+.journey-row,
+.journey-who,
+.journey-chip {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.journey-name {
+  font-family: 'PP Editorial New', Georgia, serif;
+  font-style: italic;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  margin-top: 8px;
+}
+
+.journey-summary {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--fg-muted);
+}
+
+.journey-plot {
+  position: relative;
+  height: calc(var(--steps) * var(--row));
+}
+
+.journey-row,
+.journey-rule,
+.journey-band,
+.journey-lines--wide { display: none; }
+
+.journey-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  color: var(--fg);
+}
+
+.journey-lane--after .journey-lines { color: var(--journey-accent, var(--fg)); }
+
+.journey-lines line {
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.journey-lines line.is-handoff {
+  stroke-width: 1.5;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+}
+
+.journey-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.journey-step {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--i) * var(--row));
+  height: var(--row);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.journey-step--b { padding-left: 56px; }
+
+.journey-node {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1.5px solid var(--fg);
+  background: var(--bg);
+  /* ring in the page color: opens a small gap where connectors meet the node */
+  box-shadow: 0 0 0 6px var(--bg);
+  display: grid;
+  place-items: center;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* brand steps are tinted, the same tone as the brand band in the wide layout */
+.journey-step--b .journey-node { background: var(--preview-bg); }
+
+.journey-node svg,
+.journey-chip svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.journey-chip svg { stroke-width: 2.2; }
+
+.journey-node.is-end {
+  background: var(--journey-accent, var(--fg));
+  border-color: var(--journey-accent, var(--fg));
+  color: var(--journey-on-accent, var(--bg));
+}
+
+.journey-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.journey-who {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.journey-chip {
+  position: absolute;
+  left: 52px;
+  top: calc((var(--i) + 1) * var(--row));
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px 4px 8px;
+  border: 1px solid var(--border-15);
+  border-radius: 999px;
+  background: var(--bg);
+  white-space: nowrap;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.journey-foot {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--fg-muted);
+}
+
+@container journey (min-width: 940px) {
+  .journey-frame { padding: 4px 28px; }
+
+  .journey-lane {
+    flex-direction: row;
+    gap: 24px;
+    padding: 28px 0;
+  }
+
+  .journey-side { flex: 0 0 190px; }
+
+  .journey-plot {
+    flex: 1;
+    min-width: 0;
+    height: var(--h);
+    margin-left: 76px;            /* gutter for the row names */
+    container-type: inline-size;  /* lets labels size to one column (cqw) */
+  }
+
+  .journey-row {
+    display: block;
+    position: absolute;
+    left: -76px;
+    top: var(--yc);
+    transform: translateY(-50%);
+  }
+
+  .journey-row--b { top: var(--yb); }
+
+  /* customer row: a hairline. brand row: a tinted band (work done by a person) */
+  .journey-rule {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: var(--yc);
+    border-top: 1px solid var(--border-15);
+  }
+
+  .journey-band {
+    display: block;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--yb) - 34px);
+    height: 68px;
+    border-radius: 6px;
+    background: var(--preview-bg);
+    transition: background 0.3s ease;
+  }
+
+  .journey-lines--wide { display: block; }
+  .journey-lines--narrow { display: none; }
+
+  /* a step is a point on the plot; node and label hang off it */
+  .journey-step {
+    display: block;
+    left: calc((var(--i) + 0.5) / var(--n) * 100%);
+    right: auto;
+    top: var(--yc);
+    height: 0;
+    padding: 0;
+  }
+
+  .journey-step--b {
+    top: var(--yb);
+    padding: 0;
+  }
+
+  .journey-node {
+    position: absolute;
+    left: -24px;
+    top: -24px;
+  }
+
+  .journey-step--b .journey-node { box-shadow: 0 0 0 6px var(--preview-bg); }
+
+  .journey-label {
+    position: absolute;
+    left: 0;
+    transform: translateX(-50%);
+    width: min(calc(100cqw / var(--n) - 10px), 170px);
+    text-align: center;
+  }
+
+  .journey-step--c .journey-label { bottom: 42px; }
+  .journey-step--b .journey-label { top: 48px; }
+
+  /* the row names already say who acts; keep the per-step tag for screen readers only */
+  .journey-who {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* sits on the dotted connector, 45% of the way from the customer node to the brand node */
+  .journey-chip {
+    left: calc((var(--i) + 0.95) / var(--n) * 100%);
+    top: calc(var(--yc) + (var(--yb) - var(--yc)) * 0.45);
+  }
+}
 
 /* ── Subsections within Design Decisions ── */
 .modal-subsection { margin-bottom: 2.4rem; }

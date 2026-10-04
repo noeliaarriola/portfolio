@@ -49,7 +49,8 @@ const PROJECTS = [
     year: '2024',
     tech: ['Figma', 'Shopify', 'Design Tokens'],
     thumb: '/media/cleear-cover.png',
-    image: '/media/cleear-hero.jpg',
+    image: '/media/cleear-desktop-poster.jpg', // poster shown while the cover video loads
+    video: '/media/cleear-desktop.mp4',
     content: cleearContent,
   },
   {

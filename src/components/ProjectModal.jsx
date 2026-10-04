@@ -132,10 +132,22 @@ export default function ProjectModal({ project, onClose }) {
           )}
         </div>
 
-        {/* ── Cover image placeholder ── */}
-        {project.image && (
+        {/* ── Cover: looping motion graphic when project.video is set, else image ── */}
+        {(project.video || project.image) && (
           <div className="modal-cover">
-            <img src={project.image} alt={project.name} />
+            {project.video ? (
+              <video
+                src={project.video}
+                poster={project.image}
+                aria-label={project.name}
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              <img src={project.image} alt={project.name} />
+            )}
           </div>
         )}
 

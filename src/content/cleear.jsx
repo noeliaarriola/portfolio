@@ -1,9 +1,22 @@
 // content/cleear.jsx — Cleear Cosmetics case study, EN / ES / PT.
 // Structure is defined once in build(); only the strings differ per language.
 import { P, Process } from './rich.jsx'
+import JourneyDiagram from '../components/JourneyDiagram.jsx'
 
 const STR = {
   en: {
+    journey: {
+      labels: { customer: 'Customer', brand: 'Brand', wait: 'wait', waits: 'waits', noWaits: 'no waits', steps: 'steps' },
+      before: {
+        tag: 'Before', name: 'Selling through messages',
+        steps: ['Sees the product on Instagram', 'Asks by Instagram or WhatsApp', 'Replies', 'Orders from the WhatsApp catalog', 'Confirms and arranges shipping'],
+      },
+      after: {
+        tag: 'After', name: 'Online store',
+        steps: ['Discovers products', 'Compares options', 'Buys'],
+      },
+      foot: 'Reconstruction of the previous sales process.',
+    },
     problem: {
       p1: "Cleear Cosmetics had an existing online presence, but it was **not fully supporting the brand's sales process**.",
       p2: "Customers still depended on **manual channels** to discover products and complete purchases, creating friction and limiting the brand's growth.",
@@ -29,7 +42,6 @@ const STR = {
       sub2List: ['Buttons', 'Cards', 'Product sections', 'Navigation patterns', 'Layout structure'],
       sub3Title: 'Simplifying the shopping experience',
       sub3p: 'The e-commerce structure was designed to help users move naturally **from discovery to purchase without friction**.',
-      sub3Process: ['Discover products', 'Understand options', 'Move toward purchase'],
     },
     outcome: {
       p1: 'The project transformed an informal sales experience into a **more structured and professional digital storefront**.',
@@ -40,6 +52,18 @@ const STR = {
   },
 
   es: {
+    journey: {
+      labels: { customer: 'Cliente', brand: 'Marca', wait: 'espera', waits: 'esperas', noWaits: 'sin esperas', steps: 'pasos' },
+      before: {
+        tag: 'Antes', name: 'Venta por mensajes',
+        steps: ['Ve el producto en Instagram', 'Consulta por Instagram o WhatsApp', 'Responde', 'Pide por el catálogo de WhatsApp', 'Confirma y coordina el envío'],
+      },
+      after: {
+        tag: 'Después', name: 'Tienda online',
+        steps: ['Descubre productos', 'Compara opciones', 'Compra'],
+      },
+      foot: 'Reconstrucción del proceso de venta anterior.',
+    },
     problem: {
       p1: 'Cleear Cosmetics ya tenía presencia online, pero **no acompañaba del todo el proceso de ventas de la marca**.',
       p2: 'Los clientes seguían dependiendo de **canales manuales** para descubrir productos y completar compras, lo que generaba fricción y limitaba el crecimiento de la marca.',
@@ -65,7 +89,6 @@ const STR = {
       sub2List: ['Botones', 'Tarjetas', 'Secciones de producto', 'Patrones de navegación', 'Estructura de layout'],
       sub3Title: 'Simplificar la experiencia de compra',
       sub3p: 'La estructura de e-commerce se diseñó para que los usuarios avanzaran naturalmente **del descubrimiento a la compra sin fricción**.',
-      sub3Process: ['Descubrir productos', 'Entender opciones', 'Avanzar hacia la compra'],
     },
     outcome: {
       p1: 'El proyecto transformó una experiencia de ventas informal en una **tienda digital más estructurada y profesional**.',
@@ -76,6 +99,18 @@ const STR = {
   },
 
   pt: {
+    journey: {
+      labels: { customer: 'Cliente', brand: 'Marca', wait: 'espera', waits: 'esperas', noWaits: 'sem esperas', steps: 'passos' },
+      before: {
+        tag: 'Antes', name: 'Venda por mensagens',
+        steps: ['Vê o produto no Instagram', 'Pergunta pelo Instagram ou WhatsApp', 'Responde', 'Pede pelo catálogo do WhatsApp', 'Confirma e combina o envio'],
+      },
+      after: {
+        tag: 'Depois', name: 'Loja online',
+        steps: ['Descobre produtos', 'Compara opções', 'Compra'],
+      },
+      foot: 'Reconstrução do processo de venda anterior.',
+    },
     problem: {
       p1: 'A Cleear Cosmetics já tinha presença online, mas ela **não sustentava totalmente o processo de vendas da marca**.',
       p2: 'Os clientes ainda dependiam de **canais manuais** para descobrir produtos e concluir compras, o que gerava fricção e limitava o crescimento da marca.',
@@ -101,7 +136,6 @@ const STR = {
       sub2List: ['Botões', 'Cards', 'Seções de produto', 'Padrões de navegação', 'Estrutura de layout'],
       sub3Title: 'Simplificar a experiência de compra',
       sub3p: 'A estrutura de e-commerce foi projetada para que os usuários avançassem naturalmente **da descoberta à compra sem fricção**.',
-      sub3Process: ['Descobrir produtos', 'Entender opções', 'Avançar para a compra'],
     },
     outcome: {
       p1: 'O projeto transformou uma experiência de vendas informal em uma **loja digital mais estruturada e profissional**.',
@@ -112,16 +146,45 @@ const STR = {
   },
 }
 
+// Who acts at each step of the journey diagram ('c' customer, 'b' brand) and its icon.
+// The texts come from STR[lang].journey, in the same order.
+const JOURNEY_SHAPE = {
+  before: [['c', 'eye'], ['c', 'msg'], ['b', 'reply'], ['c', 'bag'], ['b', 'check']],
+  after: [['c', 'grid'], ['c', 'list'], ['c', 'bag']],
+}
+
+const journeyLane = (lane, shape) => ({
+  ...lane,
+  steps: shape.map(([who, icon], i) => ({ who, icon, text: lane.steps[i] })),
+})
+
 function build(s) {
+  const before = journeyLane(s.journey.before, JOURNEY_SHAPE.before)
+  const after = journeyLane(s.journey.after, JOURNEY_SHAPE.after)
+
   return {
     problem: (
       <div className="modal-content-text">
         <P text={s.problem.p1} />
         <P text={s.problem.p2} />
+
+        {/* The problem as it was: selling through messages */}
+        <JourneyDiagram labels={s.journey.labels} before={before} foot={s.journey.foot} />
+
         <P text={s.problem.p3} />
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/cleear-filosofia.jpg" alt="Cleear Cosmetics — 'Filosofia das fórmulas' section with formula comparison slider" /></div>
+          <div className="modal-media-slot">
+            <video
+              src="/media/cleear-mobile.mp4"
+              poster="/media/cleear-mobile-poster.jpg"
+              aria-label="Cleear Cosmetics — mobile screens of the store in motion"
+              autoPlay
+              muted
+              loop
+              playsInline
+            />
+          </div>
         </figure>
 
         <h4 className="modal-list-title">{s.problem.challengesTitle}</h4>
@@ -182,7 +245,14 @@ function build(s) {
         <div className="modal-subsection">
           <h4 className="modal-subsection-title">{s.decisions.sub3Title}</h4>
           <P text={s.decisions.sub3p} />
-          {Process(s.decisions.sub3Process, { margin: '12px 0 0' })}
+
+          {/* The answer to the diagram in section 01: same scale, shorter path */}
+          <JourneyDiagram
+            labels={s.journey.labels}
+            after={after}
+            compare={before}
+            accent="#B69D62" /* Cleear gold, from the brand's design system */
+          />
         </div>
 
         <figure className="modal-media">
