@@ -44,17 +44,32 @@ export default function useProfileEffect() {
     renderer.setSize(container.clientWidth, container.clientHeight)
 
     const scene = new THREE.Scene()
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
+
+    // The camera's frustum has to match the canvas's actual pixel aspect
+    // ratio, or WebGL's viewport mapping stretches the square NDC space
+    // (-1..1 both axes) onto a non-square canvas — this is what was
+    // distorting the photo, independent of whatever aspect-ratio the CSS
+    // box itself had (changing that alone couldn't have fixed it).
+    // OrthographicCamera has no built-in `aspect` the way PerspectiveCamera
+    // does, so left/right are set manually here and kept in sync on resize.
+    const getAspect = () => container.clientWidth / container.clientHeight
+    const camera = new THREE.OrthographicCamera(-getAspect(), getAspect(), 1, -1, 0, 1)
 
     const uniforms = {
       uTexture:  { value: null },
       uStrength: { value: 0.0 },
     }
 
-    scene.add(new THREE.Mesh(
+    // Scaled on the x-axis to exactly fill the camera's frustum (width
+    // 2*aspect, height 2) — full-bleed with no gaps and no cropping, which
+    // only stays undistorted because the canvas's CSS aspect-ratio (4/5,
+    // see .about-photo in index.css) matches the source photo's own ratio.
+    const mesh = new THREE.Mesh(
       new THREE.PlaneGeometry(2, 2),
       new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader })
-    ))
+    )
+    mesh.scale.x = getAspect()
+    scene.add(mesh)
 
     let frameId
 
@@ -75,8 +90,14 @@ export default function useProfileEffect() {
     canvas.addEventListener('mouseenter', onMouseEnter)
     canvas.addEventListener('mouseleave', onMouseLeave)
 
-    const onResize = () =>
+    const onResize = () => {
       renderer.setSize(container.clientWidth, container.clientHeight)
+      const aspect = getAspect()
+      camera.left = -aspect
+      camera.right = aspect
+      camera.updateProjectionMatrix()
+      mesh.scale.x = aspect
+    }
     window.addEventListener('resize', onResize)
 
     return () => {

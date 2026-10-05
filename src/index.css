@@ -57,6 +57,13 @@ html, body {
   left: 0;
   width: 100%;
   height: 100vh;
+  /* svh is the viewport height with the mobile browser toolbars VISIBLE, and
+     unlike dvh it never changes as they collapse. Plain vh resolves to the
+     *large* height on iOS/Android, so the bottom ~110px of this fixed box —
+     which is exactly where .hero-cta sits — was behind the toolbar on first
+     load. dvh would reach it but reflows mid-scroll; svh is stable.
+     The vh line above stays as the fallback for older browsers. */
+  height: 100svh;
   overflow: hidden;
   display: grid;
   grid-template-rows: 60px 1fr;
@@ -260,6 +267,7 @@ html, body {
   left: 0;
   width: 100%;
   height: calc(100vh - 60px);
+  height: calc(100svh - 60px);
   z-index: 20;
   pointer-events: none;
 }
@@ -282,6 +290,7 @@ html, body {
   position: relative;
   width: 100%;
   height: calc(100vh - 60px);
+  height: calc(100svh - 60px);
   grid-row: 2;
   z-index: 5;
 }
@@ -374,14 +383,30 @@ html, body {
   margin: 2px 0;
 }
 
-.hero-top {
-  position: absolute;
-  top: 3%;
-  left: 3%;
+/* Hero content is one column in normal flow: heading, tagline, buttons.
+   It used to be two absolutely positioned boxes (.hero-top pinned to the top,
+   .hero-cta pinned to bottom: 9%), which left the buttons stranded at the very
+   bottom of the viewport: far from the tagline on tall screens, behind the
+   mobile browser toolbar on phones, and underneath the globe wireframe (the
+   canvas sits above the sections), where the outlined button was hard to read.
+   In flow, the buttons always sit right under the tagline. */
+#sec-1 .col-center {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 3vh 3% 0;
+  padding: clamp(16px, 3svh, 36px) 3% 0;
 }
 
 .giant-heading {
-  font-size: 11vw;
+  /* Sized by whichever runs out first, width or height: 12.5vw fills roughly
+     70% of the center column, and 22svh keeps the three lines + tagline +
+     buttons inside the viewport on short windows (a 1280x500 window still
+     fits). Resolves to ~128px @1024, ~171px @1366, ~180px @1440x900 and
+     ~238px @1920x1080; capped at 256px for very large monitors.
+     The first line is the fallback for browsers without svh / min(). */
+  font-size: clamp(3.375rem, 12.5vw, 16rem);
+  font-size: clamp(3.375rem, min(12.5vw, 22svh), 16rem);
   font-weight: 1000;
   line-height: 0.85;
   letter-spacing: -0.05em;
@@ -397,23 +422,38 @@ html, body {
 }
 
 .hero-tagline {
-  font-family: 'PP Editorial New', serif;
+  /* PP Editorial New is not in the repo (see the note at the top of this
+     file), so this always falls back. Bare `serif` is Times on iOS and Noto
+     Serif on Android — noticeably different italic widths and colour. Naming
+     Georgia first keeps the fallback closer to an editorial italic and
+     consistent across platforms. */
+  font-family: 'PP Editorial New', Georgia, 'Times New Roman', serif;
   font-style: italic;
   font-weight: 400;
-  font-size: 1.5rem;
+  /* Gentler slope than the headline on purpose: a reading face needs an
+     optical floor (17px) that a display face does not. The headline:tagline
+     ratio then moves smoothly 3.2 -> 6.6 across the range instead of
+     wandering 3.1 -> 7.3 -> 4.1 -> 6.6 with a jump at 900px. */
+  font-size: clamp(1.0625rem, 0.91rem + 0.66vw, 1.5rem);
   letter-spacing: 0.01em;
   opacity: 0;
   transform: translateY(15px);
   line-height: 1.5;
-  margin-top: 22px;
+  /* em, so the gap tracks the tagline instead of staying at a flat 22px.
+     Resolves to the current 22px at the 24px desktop size. */
+  margin-top: 0.92em;
   color: var(--fg);
 }
 
 .hero-cta {
-  position: absolute;
-  bottom: 9%;
-  left: 3%;
+  /* in flow, right under the tagline — see #sec-1 .col-center above */
+  margin-top: 4.5vh;
+  margin-top: clamp(1.5rem, 4.5svh, 3rem);
   display: flex;
+  /* The pt/es labels ("VER TRABALHOS down-arrow") are long enough to overflow
+     the 88%-wide hero box under ~340px. Wrapping beats horizontal clipping,
+     which is what body{overflow-x:hidden} was silently doing. */
+  flex-wrap: wrap;
   gap: 14px;
   align-items: center;
   opacity: 0;
@@ -425,6 +465,11 @@ html, body {
   font-weight: 600;
   letter-spacing: 0.15em;
   padding: 13px 26px;
+  /* 13px padding on 11px text is a ~40px box; iOS HIG asks for 44px. */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   border: 1px solid var(--fg);
   text-transform: uppercase;
@@ -619,7 +664,8 @@ html, body {
 
 .section-headline {
   font-family: 'DM Sans', sans-serif;
-  font-size: clamp(3rem, 5.5vw, 4.2rem);
+  /* same curve as before up to ~1530px wide; keeps growing on larger monitors */
+  font-size: clamp(3rem, 5.5vw, max(4.2rem, 4.4vw));
   font-weight: 700;
   line-height: 1.02;
   letter-spacing: -0.03em;
@@ -634,7 +680,7 @@ html, body {
 }
 
 .bio-paragraph {
-  font-size: 17px;
+  font-size: clamp(17px, 1.05vw, 21px);
   line-height: 1.72;
   opacity: 0.7;
   font-weight: 400;
@@ -646,12 +692,21 @@ html, body {
   top: 50%;
   right: 0%;
   transform: translateY(-50%);
-  width: 380px;
+  /* ~380px at 1440 as before; scales with the screen, and never taller than
+     the section (the photo is 4:5, so width <= 80% of the free height) */
+  width: clamp(300px, 26vw, 500px);
+  max-width: calc((100vh - 140px) * 0.8);
+  max-width: calc((100svh - 140px) * 0.8);
 }
 
 .about-photo {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  /* Matches Profile.jpg's actual pixel size (896x1120 = 4:5). The shader in
+     useProfileEffect.js draws the texture as a full-bleed quad with no
+     aspect correction, so a box ratio that doesn't match the source image
+     visibly stretches it — this was doing that at every width, not just on
+     mobile. */
+  aspect-ratio: 4 / 5;
   display: block;
   cursor: crosshair;
 }
@@ -677,7 +732,11 @@ html, body {
   display: grid;
   grid-template-columns: 70px 1fr 42% 48px;
   align-items: stretch;
+  /* 130px on a typical laptop; shorter on short windows so the four rows
+     always fit (they are clipped otherwise — the page has no native scroll),
+     taller on large monitors so the list does not look lost */
   min-height: 130px;
+  min-height: max(min(130px, 22svh), 15svh);
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   gap: 0;
@@ -699,7 +758,7 @@ html, body {
 
 .project-num {
   font-family: 'PP Editorial New', serif;
-  font-size: 16px;
+  font-size: clamp(16px, 1.1vw, 22px);
   font-weight: 400;
   opacity: 0.5;
   display: flex;
@@ -717,7 +776,7 @@ html, body {
 
 .project-name {
   font-family: 'DM Sans', sans-serif;
-  font-size: 20px;
+  font-size: clamp(20px, 1.5vw, 30px);
   font-weight: 500;
   letter-spacing: -0.01em;
 }
@@ -730,7 +789,7 @@ html, body {
 }
 
 .project-tag {
-  font-size: 9px;
+  font-size: clamp(9px, 0.62vw, 12px);
   font-weight: 500;
   letter-spacing: 0.1em;
   opacity: 0.5;
@@ -738,7 +797,7 @@ html, body {
 }
 
 .project-year {
-  font-size: 9px;
+  font-size: clamp(9px, 0.62vw, 12px);
   font-weight: 500;
   letter-spacing: 0.08em;
   opacity: 0.6;
@@ -841,12 +900,12 @@ html, body {
   left: 6%;
   transform: translateY(-50%);
   width: 88%;
-  max-width: 680px;
+  max-width: max(680px, 42vw);
 }
 
 .contact-headline {
   font-family: 'DM Sans', sans-serif;
-  font-size: 3rem;
+  font-size: clamp(3rem, 3.6vw, 4.6rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -871,19 +930,19 @@ html, body {
 
 .link-item {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: clamp(120px, 8vw, 160px) 1fr;
   align-items: center;
 }
 
 .link-label {
-  font-size: 10px;
+  font-size: clamp(10px, 0.68vw, 13px);
   letter-spacing: 0.15em;
   opacity: 0.4;
 }
 
 .contact-link {
   font-family: 'DM Sans', sans-serif;
-  font-size: 18px;
+  font-size: clamp(18px, 1.25vw, 24px);
   font-weight: 600;
   color: var(--fg);
   text-decoration: none;
@@ -913,6 +972,10 @@ html, body {
 }
 
 .back-to-top {
+  /* Vertical, like the other rail labels: set horizontally, "VOLVER ARRIBA" /
+     "VOLTAR AO TOPO" is wider than the 100px (70px under 1100px) right rail
+     and spilled over the center column. */
+  writing-mode: vertical-rl;
   font-size: 10px;
   letter-spacing: 0.15em;
   cursor: pointer;
@@ -1982,49 +2045,146 @@ html, body {
   .nav-link.active { opacity: 1; }
   .lang-option { font-size: 11px; padding: 4px 9px; }
 
-  /* Hero */
-  .hero-top { top: 5%; left: 6%; right: 6%; }
-  .giant-heading { font-size: 15vw; }
-  .hero-tagline { font-size: 1.15rem; margin-top: 16px; }
-  .hero-date-corner { display: none; }
-  .hero-cta { left: 6%; bottom: 10%; }
-  .cta-btn { padding: 12px 20px; font-size: 10px; }
-
-  /* About: text on top, photo tucked bottom-right */
-  .about-text-container {
-    top: 6%;
-    left: 6%;
-    transform: none;
-    max-width: 88%;
+  /* Hero. The heading gets its own, larger scale here on purpose (so there is
+     a visible step at this breakpoint, where the layout also changes from
+     three columns to one). 20vw is the widest it can go: the longest word,
+     "BUILDING.", is ~4.36em wide, and 4.36 x 20vw fills the 88%-wide content
+     box. The 16svh term only matters when the screen is short and wide (a
+     phone in landscape), where 20vw alone made the three lines taller than
+     the viewport. .hero-tagline keeps its shared clamp(). */
+  .giant-heading {
+    font-size: clamp(2.75rem, 20vw, 12rem);
+    font-size: clamp(2.75rem, min(20vw, 16svh), 12rem);
   }
-  .section-headline { font-size: clamp(1.9rem, 7vw, 2.6rem); margin-bottom: 18px; }
-  .bio-paragraph { font-size: 14px; line-height: 1.65; }
-  .about-photo-container {
-    top: auto;
-    bottom: 4%;
-    right: 6%;
+  #sec-1 .col-center {
+    padding: 4vh 6% 0;
+    padding: clamp(18px, 4svh, 44px) 6% 0;
+  }
+  .hero-date-corner { display: none; }
+  .hero-cta {
+    margin-top: 4vh;
+    margin-top: clamp(1.25rem, 4svh, 2.5rem);
+  }
+  /* Was 12px/10px = a ~36px tap target. Keep 44px via .cta-btn min-height. */
+  .cta-btn { padding: 13px 20px; font-size: 11px; }
+
+  /* .layout-grid never declares grid-template-rows, so its single implicit
+     row auto-sizes to whatever its tallest item needs — it does NOT
+     actually fill the section's own height just because the grid container
+     has height:100%. That's harmless everywhere else (col-left/col-right
+     are short and hidden on mobile anyway), but #sec-2 .col-center is now a
+     flex column whose content can genuinely be taller than the section
+     (especially the longer ES/PT bio text): the row silently grew to match
+     it, which is what made height:100% below a no-op and let the headline
+     sit flush at the top with no reliable margin. Forcing the row to the
+     section's real height makes centering/padding math actually correct;
+     any excess content overflows visibly instead of invisibly inflating
+     the section, which .col-center's own overflow-y below now handles. */
+  #sec-2.layout-grid { grid-template-rows: 100%; }
+
+  /* #sec-2 clips at the section's own box; .col-center (below) can be
+     genuinely taller than that box — a full-bio-length paragraph plus a
+     photo now sized to match its width often is — and useScrollAnimations.js
+     translates it upward as part of the *same* scroll-scrubbed timeline
+     that drives every other section transition, so the overflow scrolls
+     into view exactly like the rest of the page, not through a separate
+     nested scroll area. That distinction matters: a native
+     overflow-y:auto here fights this site's whole scroll model — the
+     browser drains that inner scroll to its end before yielding scroll
+     events back to the page, which reads as the section transition just
+     not responding. overflow:hidden plus an external transform sidesteps
+     that entirely, since nothing here is driven by native scroll events. */
+  #sec-2 { overflow: hidden; }
+
+  /* About: title, then paragraph, then photo — stacked and centered.
+     The JSX already renders .about-text-container (headline + paragraph)
+     before .about-photo-container, so a plain flex column on their shared
+     parent gets the order for free; both children switch from the desktop
+     absolute-positioned layout (text pinned top-left, photo pinned
+     bottom-right) to normal flow so nothing here can overlap regardless of
+     bio length. Scoped to #sec-2 — .col-center is shared by every section.
+     flex-start + a fixed top padding instead of justify-content:center:
+     centering only "gives air" when there's slack space to distribute, and
+     with a long bio there often isn't much — a guaranteed top offset (same
+     idea as .hero-top's 5%) doesn't depend on how much content there is.
+     Free to be this generous now that overflow scrolls into view instead
+     of needing to be avoided by tightening every value that touches it. */
+  #sec-2 .col-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    gap: 28px;
+    height: 100%;
+    padding: 15% 6% 6%;
+  }
+  .about-text-container {
+    position: static;
     transform: none;
-    width: min(44vw, 210px);
+    width: 100%;
+    max-width: none;
+  }
+  /* the upper bounds are what tablets get; phones resolve to the old sizes */
+  .section-headline { font-size: clamp(1.9rem, 7vw, 3.4rem); margin-bottom: 18px; }
+  .bio-paragraph { font-size: clamp(14px, 2.1vw, 17px); line-height: 1.65; margin: 0 auto; max-width: 38ch; }
+  .about-photo-container {
+    position: static;
+    transform: none;
+    /* Matches .bio-paragraph's own width formula (max-width:38ch, capped by
+       its 100%-wide parent) exactly, so the photo reads as the same visual
+       width as the paragraph above it rather than a smaller block floating
+       under a wider one — same 6% side margins as before, just filling
+       them the way the text already does. Kept at this size on every
+       mobile/tablet height now — see the #sec-2 comment above for why it no
+       longer needs to shrink on shorter screens. */
+    width: min(38ch, 100%);
+    max-width: none; /* the desktop height cap does not apply: this layout scrolls */
   }
 
   /* Projects list: number · info · thumb (row itself is the tap target) */
+  /* clamp() lower bounds are the phone sizes; tablets scale up from there */
   .project-row {
-    grid-template-columns: 34px 1fr 96px;
-    min-height: 96px;
+    grid-template-columns: clamp(34px, 7vw, 60px) 1fr clamp(96px, 26vw, 240px);
+    min-height: clamp(96px, 15vw, 132px);
   }
   .project-open { display: none; }
-  .project-num { font-size: 13px; padding-left: 6px; }
-  .project-name { font-size: 17px; }
+  .project-num { font-size: clamp(13px, 2vw, 16px); padding-left: 6px; }
+  .project-name { font-size: clamp(17px, 2.7vw, 22px); }
   .project-main { padding: 14px 12px 14px 0; gap: 6px; }
-  .project-tag { font-size: 8px; }
+  .project-tag,
+  .project-year { font-size: clamp(8px, 1.3vw, 10px); }
   .project-hover-preview { display: none; }
 
   /* Contact */
   .contact-container { left: 6%; width: 88%; }
-  .contact-headline { font-size: clamp(2rem, 8vw, 2.6rem); margin-bottom: 32px; }
+  .contact-container { max-width: 680px; }
+  .contact-headline { font-size: clamp(2rem, 8vw, 3.4rem); margin-bottom: 32px; }
   .contact-links { gap: 18px; padding-top: 22px; }
   .link-item { grid-template-columns: 84px 1fr; }
-  .contact-link { font-size: 15px; word-break: break-word; }
+  .link-label { font-size: 10px; }
+  .contact-link { font-size: clamp(15px, 2.3vw, 18px); word-break: break-word; }
+}
+
+/* Short and narrow: a phone held in landscape. Everything lives in one fixed
+   viewport-height box with no native scroll, so vertical space is the scarce
+   resource here — tighten paddings instead of letting content get clipped. */
+@media (max-width: 900px) and (max-height: 520px) {
+  #sec-1 .col-center { padding-top: 12px; }
+  .hero-tagline { margin-top: 0.5em; }
+  .hero-cta { margin-top: 14px; }
+
+  .project-row { min-height: 0; }
+  .project-main { padding: 8px 12px 8px 0; gap: 4px; }
+
+  .contact-headline { margin-bottom: 18px; }
+  .contact-links { gap: 12px; padding-top: 16px; }
+}
+
+/* Very narrow phones: the label column leaves too little room for the
+   LinkedIn URL, which wrapped and orphaned its arrow — stack label over link. */
+@media (max-width: 380px) {
+  .link-item { grid-template-columns: 1fr; gap: 4px; }
 }
 
 /* Phones: tighter type & full-bleed modal */
@@ -2050,4 +2210,17 @@ html, body {
   .modal-tech { gap: 6px; margin-top: 14px; }
   .modal-tech span { font-size: 10px; padding: 5px 11px; }
   .modal-quote { font-size: 1.25rem; padding-left: 18px; }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────────────
+   The hero starts at opacity 0 in CSS and is revealed by GSAP, so the reveal
+   itself is handled in useScrollAnimations.js (gsap.set instead of gsap.to).
+   The 3D layer stays visible and rendering — it's a static decorative
+   wireframe, not a moving UI element, and hiding the whole canvas here
+   previously meant anyone with this OS setting on couldn't see the globe at
+   all. useScrollAnimations.js still freezes its own idle auto-rotation under
+   this same media query, which is the part actually worth stopping. */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-dot { animation: none; opacity: 0.6; }
+  .scroll-indicator { animation: none; opacity: 1; }
 }
