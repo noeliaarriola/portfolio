@@ -741,7 +741,7 @@ html, body {
   cursor: pointer;
   gap: 0;
   color: var(--fg);
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, opacity 0.35s ease;
 }
 
 .project-row:first-child {
@@ -764,6 +764,7 @@ html, body {
   display: flex;
   align-items: center;
   padding-left: 10px;
+  transition: opacity 0.3s ease;
 }
 
 .project-main {
@@ -779,6 +780,7 @@ html, body {
   font-size: clamp(20px, 1.5vw, 30px);
   font-weight: 500;
   letter-spacing: -0.01em;
+  transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .project-meta {
@@ -804,19 +806,23 @@ html, body {
 }
 
 .project-thumb {
+  position: relative;
   width: 100%;
   height: 100%;
   background: var(--border);
   overflow: hidden;
   align-self: stretch;
+  /* lets the hover wall size its columns from the thumbnail width (cqw) */
+  container-type: inline-size;
 }
 
-.project-thumb img {
+.project-cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
   opacity: 0.9;
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .project-open {
@@ -835,12 +841,93 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
-.project-open:hover {
-  opacity: 1;
-  transform: rotate(45deg);
+/* Only the glyph rotates — rotating the whole cell tilted its left border */
+.project-open-icon {
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+/* ── Project row hover ──────────────────────────────────────────────────────── */
+/* Wall of project screens sliding upward, stacked over the cover. Markup and
+   per-column speed live in ProjectRow.jsx; the screens come from each project's
+   `wall` in SectionProjects.jsx. It is paused and invisible until the row is
+   hovered or focused. px values are fallbacks for browsers without cqw. */
+.project-wall {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--preview-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+
+.wall-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 11px;
+  gap: 2.2cqw;
+}
+
+.wall-col { flex: none; }
+.wall-col--desktop { width: 180px; width: 36cqw; }
+.wall-col--mobile  { width: 75px;  width: 15cqw; }
+
+.wall-track {
+  display: flex;
+  flex-direction: column;
+  animation: wall-slide-up var(--wall-dur, 30s) linear infinite;
+  animation-delay: var(--wall-delay, 0s);
+  animation-play-state: paused;
+}
+
+.wall-track img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 11px;
+  margin-bottom: 2.2cqw;
+  border-radius: 3px;
+  background: var(--bg);
+  box-shadow: 0 0 0 1px var(--border), 0 6px 14px -8px rgba(0, 0, 0, 0.35);
+}
+
+.wall-col--mobile .wall-track img { border-radius: 7px; }
+
+/* The track holds two identical sets, so -50% lands exactly on the start */
+@keyframes wall-slide-up {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-50%); }
+}
+
+/* outline (not box-shadow) so the ring is drawn over the thumbnail too */
+.project-row:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: -2px;
+}
+
+/* Mouse and keyboard only: on touch, :hover sticks after a tap and would
+   leave the other rows dimmed */
+@media (hover: hover) and (pointer: fine) {
+  .projects-list:has(.project-row:is(:hover, :focus-visible)) .project-row:not(:hover, :focus-visible) {
+    opacity: 0.35;
+  }
+  .project-row:is(:hover, :focus-visible) .project-num { opacity: 1; }
+  .project-row:is(:hover, :focus-visible) .project-open { opacity: 1; }
+  .project-row:is(:hover, :focus-visible) .project-wall { opacity: 1; }
+  .project-row:is(:hover, :focus-visible) .wall-track { animation-play-state: running; }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .project-row:is(:hover, :focus-visible) .project-name { transform: translateX(10px); }
+  .project-row:is(:hover, :focus-visible) .project-open-icon { transform: rotate(45deg); }
+  .project-row:is(:hover, :focus-visible) .project-cover { transform: scale(1.04); }
 }
 
 .more-projects-label {
@@ -2155,6 +2242,7 @@ html, body {
   .project-tag,
   .project-year { font-size: clamp(8px, 1.3vw, 10px); }
   .project-hover-preview { display: none; }
+  .project-wall { display: none; }
 
   /* Contact */
   .contact-container { left: 6%; width: 88%; }
@@ -2223,4 +2311,5 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .scroll-dot { animation: none; opacity: 0.6; }
   .scroll-indicator { animation: none; opacity: 1; }
+  .project-wall { display: none; }
 }

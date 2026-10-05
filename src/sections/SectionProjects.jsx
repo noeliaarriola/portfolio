@@ -4,7 +4,7 @@
 //
 // Each project has a `content` object with 4 keys for the case-study modal:
 //   problem, role, decisions, outcome  (fill in when ready — leave empty for placeholder)
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import ProjectRow from '../components/ProjectRow'
 import ProjectModal from '../components/ProjectModal'
@@ -18,6 +18,15 @@ import sprContent from '../content/spr.jsx'
 // To add a project: duplicate an entry and update all fields.
 // Images go in /public/media/ and are referenced from there.
 // Modal content: fill in problem / role / decisions / outcome when ready.
+//
+// `wall` is the row's hover: columns of screens that slide upward behind the
+// cover. Each column is { kind: 'desktop' | 'mobile', shots: [...] }; columns
+// are laid out left to right and the screens in a column loop top to bottom.
+// The shots are small copies made just for this (public/media/wall/, 520px
+// wide for desktop and 220px for mobile) — do not point at the full-size
+// case-study images, they are far too heavy for a hover.
+const shot = (name) => `/media/wall/${name}.jpg`
+
 const PROJECTS = [
   {
     num: '02',
@@ -28,6 +37,11 @@ const PROJECTS = [
     tech: ['Figma', 'SEO'],
     thumb: '/media/powersis-cover.png',
     image: '/media/powersis-cover.png',
+    wall: [
+      { kind: 'desktop', shots: [shot('powersis-hero'), shot('powersis-servicos'), shot('powersis-sobre')] },
+      { kind: 'desktop', shots: [shot('powersis-servicos'), shot('powersis-sobre'), shot('powersis-hero')] },
+      { kind: 'desktop', shots: [shot('powersis-sobre'), shot('powersis-hero'), shot('powersis-servicos')] },
+    ],
     content: powersisContent,
   },
   {
@@ -39,6 +53,12 @@ const PROJECTS = [
     tech: ['Figma', 'FigJam', 'Miro'],
     thumb: '/media/spr-hero.jpg',
     image: '/media/spr-hero.jpg',
+    // Provisional: research boards, until final screens are exported
+    wall: [
+      { kind: 'desktop', shots: [shot('spr-personas'), shot('spr-userflow'), shot('spr-ia')] },
+      { kind: 'desktop', shots: [shot('spr-define'), shot('spr-audit'), shot('spr-userflow')] },
+      { kind: 'desktop', shots: [shot('spr-ia'), shot('spr-personas'), shot('spr-define')] },
+    ],
     content: sprContent,
   },
   {
@@ -51,6 +71,13 @@ const PROJECTS = [
     thumb: '/media/cleear-cover.png',
     image: '/media/cleear-desktop-poster.jpg', // poster shown while the cover video loads
     video: '/media/cleear-desktop.mp4',
+    wall: [
+      { kind: 'desktop', shots: [shot('cleear-hero'), shot('cleear-produtos'), shot('cleear-filosofia')] },
+      { kind: 'mobile', shots: [shot('cleear-mobile-hero'), shot('cleear-mobile-produtos')] },
+      { kind: 'desktop', shots: [shot('cleear-produtos'), shot('cleear-filosofia'), shot('cleear-hero')] },
+      { kind: 'mobile', shots: [shot('cleear-mobile-produtos'), shot('cleear-mobile-hero')] },
+      { kind: 'desktop', shots: [shot('cleear-filosofia'), shot('cleear-hero'), shot('cleear-produtos')] },
+    ],
     content: cleearContent,
   },
   {
@@ -63,13 +90,38 @@ const PROJECTS = [
     link: 'https://appbit-web.onrender.com/',
     thumb: '/media/appbit-cover.png',
     image: '/media/appbit-pitch-cover.png',
+    // Provisional: pitch slides and flows, until final screens are exported
+    wall: [
+      { kind: 'desktop', shots: [shot('appbit-pitch-solucao'), shot('appbit-pitch-cover'), shot('appbit-pitch-conclusao')] },
+      { kind: 'mobile', shots: [shot('appbit-flow-onboarding'), shot('appbit-design-system')] },
+      { kind: 'desktop', shots: [shot('appbit-pitch-conclusao'), shot('appbit-flow-assistente'), shot('appbit-pitch-solucao')] },
+      { kind: 'mobile', shots: [shot('appbit-design-system'), shot('appbit-flow-onboarding')] },
+      { kind: 'desktop', shots: [shot('appbit-pitch-cover'), shot('appbit-pitch-solucao'), shot('appbit-flow-assistente')] },
+    ],
     content: appbitContent,
   },
 ]
 
 export default function SectionProjects() {
   const [activeProject, setActiveProject] = useState(null)
+  const [showWall, setShowWall] = useState(false)
   const t = useT()
+
+  // The hover wall is only for mouse users who have not asked for reduced
+  // motion. Its images are requested once the browser is idle, so the first
+  // paint of the site never pays for them.
+  useEffect(() => {
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!canHover || reducedMotion) return
+    const arm = () => setShowWall(true)
+    if ('requestIdleCallback' in window) {
+      const id = window.requestIdleCallback(arm, { timeout: 4000 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = setTimeout(arm, 2000)
+    return () => clearTimeout(id)
+  }, [])
 
   // Localize each project's subtitle + tags for the active language.
   // Names, years, images and rich case-study content stay as authored.
@@ -102,6 +154,7 @@ export default function SectionProjects() {
               <ProjectRow
                 key={project.num}
                 {...project}
+                showWall={showWall}
                 onClick={() => setActiveProject(project)}
               />
             ))}
