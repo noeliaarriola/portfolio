@@ -2,6 +2,12 @@
   command = "npm run build"
   publish = "dist"
 
+# App BiT presentation (static page in public/appbit)
+[[redirects]]
+  from = "/appbit"
+  to = "/appbit/index.html"
+  status = 200
+
 # Single-page app: every route serves index.html
 [[redirects]]
   from = "/*"
