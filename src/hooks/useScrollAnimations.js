@@ -136,17 +136,22 @@ export default function useScrollAnimations() {
     // Below 900px the side rails are gone and the contact block is centred:
     // the crane fills the lower part of the screen. Its placement is
     // measured, not hard-coded: a sample of its vertices is projected at the
-    // rendered rotation, and it is scaled and shifted so that 85% of it is on
-    // screen — the cranes fully, the base of the hand running off the
+    // rendered rotation, and it is scaled and shifted so that it is almost
+    // entirely on screen — the cranes fully, only the wrist running off the
     // bottom-left corner — and never reaches the title. Works for any phone
     // size and any length of text above.
-    const CRANE_ROTATION = [-0.15, -Math.PI * 0.1, 0.10] // what animate() renders with no pointer
+    // Mobile only: the whole composition is tilted counter-clockwise so the
+    // cranes fly upward across the screen instead of levelling off.
+    const MOBILE_CRANE_TILT = 0.3 // radians, ~17°
+    let craneTilt = 0
+    // what animate() renders with no pointer
+    const craneRotation = () => [-0.15, -Math.PI * 0.1, 0.10 + craneTilt]
     let craneSample = null
     const craneProbe = new THREE.Object3D()
     const probeVec = new THREE.Vector3()
     const projectedBounds = (scale, x, y) => {
       craneProbe.position.set(x, y, 0)
-      craneProbe.rotation.set(...CRANE_ROTATION)
+      craneProbe.rotation.set(...craneRotation())
       craneProbe.scale.setScalar(scale)
       craneProbe.updateMatrixWorld(true)
       camera.updateMatrixWorld()
@@ -178,27 +183,29 @@ export default function useScrollAnimations() {
       // same breakpoint as the CSS (the canvas container is narrower than the
       // window on desktop, so its own width can't be used for this)
       if (!window.matchMedia('(max-width: 900px)').matches) {
+        craneTilt = 0
         return { x: halfW * 0.15, y: -halfH * 0.4, scale: 5.8 }
       }
+      craneTilt = MOBILE_CRANE_TILT
       if (!craneSample) return { x: halfW * 0.5, y: -halfH * 0.75, scale: halfW * 4 }
-      // 85% of the model's on-screen bounding box inside the screen: the cut
-      // is split between the left and the bottom (r each, (1-r)^2 = 0.85), so
-      // only the base of the hand runs off the bottom-left corner. The right
-      // edge (the cranes) stays on screen.
-      const r = 1 - Math.sqrt(0.85)
+      // The cranes (right edge) stay on screen; the hand is shown almost
+      // whole: only 1% of the model's width is cut on the left and 8% of its
+      // height at the bottom — the wrist, running off the bottom-left corner.
+      const cutLeft = 0.01
+      const cutBottom = 0.08
       const right = 0.97
       const titleLimit = linksTopNdc()
       let scale = halfW * 2.5
       let x = 0, y = 0
       for (let i = 0; i < 4; i++) {
         // scale so the visible width (from the screen's left edge to `right`)
-        // is (1 - r) of the model's width
+        // is (1 - cutLeft) of the model's width
         const b0 = projectedBounds(scale, x, y)
-        scale *= ((right + 1) / (1 - r)) / (b0.maxX - b0.minX)
+        scale *= ((right + 1) / (1 - cutLeft)) / (b0.maxX - b0.minX)
         for (let j = 0; j < 3; j++) { // converges in 2-3 steps (perspective)
           const b = projectedBounds(scale, x, y)
           x += (right - b.maxX) * halfW
-          y += (-1 - r * (b.maxY - b.minY) - b.minY) * halfH
+          y += (-1 - cutBottom * (b.maxY - b.minY) - b.minY) * halfH
         }
       }
       // short phones: never reach the title
@@ -209,7 +216,7 @@ export default function useScrollAnimations() {
         for (let j = 0; j < 3; j++) {
           const c = projectedBounds(scale, x, y)
           x += (right - c.maxX) * halfW
-          y += (-1 - r * (c.maxY - c.minY) - c.minY) * halfH
+          y += (-1 - cutBottom * (c.maxY - c.minY) - c.minY) * halfH
         }
       }
       return { x, y, scale }
@@ -485,7 +492,7 @@ export default function useScrollAnimations() {
         if (craneGroup) {
           craneGroup.rotation.x = -0.15 + mouseY * 0.15
           craneGroup.rotation.y = -Math.PI * 0.1 + mouseX * 0.25
-          craneGroup.rotation.z =  0.10 + mouseX * 0.10
+          craneGroup.rotation.z =  0.10 + craneTilt + mouseX * 0.10
           // Drift away from cursor so links are easier to reach
           craneGroup.position.x = craneBaseX - mouseX * 0.2
           craneGroup.position.y = craneBaseY - mouseY * 0.15
