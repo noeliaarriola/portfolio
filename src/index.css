@@ -2270,15 +2270,10 @@ html, body {
     line-height: 1.5;
     opacity: 0.6;
   }
+  /* type comes from .section-headline, exactly like the About title */
   .projects-mobile-title {
     display: block;
     margin: 0;
-    text-align: center;
-    font-family: 'DM Sans', sans-serif;
-    font-size: clamp(1.9rem, 7vw, 3.4rem); /* same as the About and Contact titles */
-    font-weight: 700;
-    line-height: 1.02;
-    letter-spacing: -0.03em;
   }
   .projects-list {
     height: auto;

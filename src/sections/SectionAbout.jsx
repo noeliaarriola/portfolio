@@ -54,7 +54,7 @@ export default function SectionAbout() {
           </p>
         </div>
         <div className="about-photo-container">
-          <canvas id="profile-canvas" data-src="/media/Profile.jpg" className="about-photo" />
+          <canvas id="profile-canvas" data-src="/media/profile-2026-10.jpg" className="about-photo" />
         </div>
       </div>
 

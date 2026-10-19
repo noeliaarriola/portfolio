@@ -36,6 +36,8 @@ const DICT = {
     projects: {
       selectedWork: 'SELECTED WORK',
       moreSoon: 'MORE PROJECTS SOON',
+      titlePre: 'Selected ',
+      titleEm: 'work.',
       tapHint: 'Tap a project to open its case study',
       subtitles: {
         'Cleear Cosmetics': 'Creating a cohesive e-commerce experience for a growing beauty brand',
@@ -101,6 +103,8 @@ const DICT = {
     projects: {
       selectedWork: 'TRABAJO SELECCIONADO',
       moreSoon: 'MÁS PROYECTOS PRONTO',
+      titlePre: 'Trabajo ',
+      titleEm: 'seleccionado.',
       tapHint: 'Toca un proyecto para ver su caso de estudio',
       subtitles: {
         'Cleear Cosmetics': 'Creando una experiencia de e-commerce coherente para una marca de belleza en crecimiento',
@@ -166,6 +170,8 @@ const DICT = {
     projects: {
       selectedWork: 'TRABALHOS SELECIONADOS',
       moreSoon: 'MAIS PROJETOS EM BREVE',
+      titlePre: 'Trabalhos ',
+      titleEm: 'selecionados.',
       tapHint: 'Toque em um projeto para ver o estudo de caso',
       subtitles: {
         'Cleear Cosmetics': 'Criando uma experiência de e-commerce coesa para uma marca de beleza em crescimento',

@@ -155,7 +155,9 @@ export default function SectionProjects() {
               becomes the section's centred title, with a hint as subtitle. */}
           <span className="sec-num mobile-sec-num" aria-hidden="true">03</span>
           <div className="projects-mobile-head">
-            <h2 className="projects-mobile-title">{t.projects.selectedWork}</h2>
+            <h2 className="section-headline projects-mobile-title">
+              {t.projects.titlePre}<em>{t.projects.titleEm}</em>
+            </h2>
             <p className="projects-mobile-hint">{t.projects.tapHint}</p>
           </div>
           <div className="projects-list">
