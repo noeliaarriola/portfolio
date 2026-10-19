@@ -559,14 +559,27 @@ export default function useScrollAnimations() {
     const aboutColCenter = document.querySelector('#sec-2 .col-center')
     const getAboutOverflow = () =>
       aboutColCenter ? Math.max(0, aboutColCenter.scrollHeight - aboutColCenter.clientHeight) : 0
-    // A function value (not a plain number) so `.invalidate()` on resize —
-    // see below — picks up a freshly measured overflow instead of the
-    // stale one captured when the timeline was first built.
-    const aboutRevealTween = gsap.to('#sec-2 .col-center', {
-      y: () => -getAboutOverflow(),
-      duration: 1.2,
-      ease: 'none',
-    })
+    // The tween only drives a 0..1 progress; the actual offset is computed
+    // from it on every update, against the overflow measured right then.
+    // (It used to tween `y` directly and call .invalidate() on resize — but
+    // invalidate() re-records the tween's start from wherever the element is
+    // at that moment, and mobile browsers fire resize while scrolling (the
+    // URL bar hiding). The start got captured mid-reveal and scrolling back
+    // up stopped short of 0, leaving the section title cut off.)
+    const aboutReveal = { p: 0 }
+    const applyAboutReveal = () => {
+      if (aboutColCenter) gsap.set(aboutColCenter, { y: -aboutReveal.p * getAboutOverflow() })
+    }
+    const aboutRevealTween = gsap.fromTo(aboutReveal,
+      { p: 0 },
+      {
+        p: 1,
+        duration: 1.2,
+        ease: 'none',
+        immediateRender: false,
+        onUpdate: applyAboutReveal,
+        onReverseComplete: applyAboutReveal, // lands exactly on 0 when scrolled back
+      })
 
     const mainTl = gsap.timeline({
       scrollTrigger: {
@@ -607,15 +620,15 @@ export default function useScrollAnimations() {
     const onWindowLoad = () => {
       // Web fonts finishing late can reflow the bio paragraph (more/fewer
       // lines), changing how much .col-center actually overflows by.
-      aboutRevealTween.invalidate()
+      applyAboutReveal()
       ScrollTrigger.refresh()
     }
     window.addEventListener('load', onWindowLoad)
 
     // Same reasoning on resize/orientation-change: the overflow amount is
     // layout-dependent (viewport width changes how the photo and paragraph
-    // wrap), so the captured y-target needs re-measuring, not just reuse.
-    const onAboutResize = () => aboutRevealTween.invalidate()
+    // wrap), so the offset is recomputed from the current progress.
+    const onAboutResize = () => applyAboutReveal()
     window.addEventListener('resize', onAboutResize)
 
     // ─── Nav: Active Link + Smooth Scroll ────────────────────────────────────
