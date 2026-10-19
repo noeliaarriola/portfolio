@@ -13,16 +13,20 @@ const vertexShader = `
 const fragmentShader = `
   uniform sampler2D uTexture;
   uniform float uStrength;
+  uniform vec2 uUvScale;
   varying vec2 vUv;
 
   void main() {
+    // "object-fit: cover": uUvScale crops the photo around its centre when
+    // the canvas box is not the photo's own ratio, instead of stretching it.
+    vec2 uv = (vUv - 0.5) * uUvScale + 0.5;
     float offset = uStrength * 0.018;
 
-    float r = texture2D(uTexture, vec2(vUv.x + offset, vUv.y)).r;
-    float g = texture2D(uTexture, vUv).g;
-    float b = texture2D(uTexture, vec2(vUv.x - offset, vUv.y)).b;
+    float r = texture2D(uTexture, vec2(uv.x + offset, uv.y)).r;
+    float g = texture2D(uTexture, uv).g;
+    float b = texture2D(uTexture, vec2(uv.x - offset, uv.y)).b;
 
-    vec4 base = texture2D(uTexture, vUv);
+    vec4 base = texture2D(uTexture, uv);
     float luma = dot(base.rgb, vec3(0.299, 0.587, 0.114));
     vec3 glitched = mix(vec3(luma), vec3(r, g, b), 0.8);
 
@@ -38,43 +42,57 @@ export default function useProfileEffect() {
     const canvas = document.getElementById('profile-canvas')
     if (!canvas) return
 
-    const container = canvas.parentElement
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setSize(container.clientWidth, container.clientHeight)
 
     const scene = new THREE.Scene()
 
-    // The camera's frustum has to match the canvas's actual pixel aspect
-    // ratio, or WebGL's viewport mapping stretches the square NDC space
-    // (-1..1 both axes) onto a non-square canvas — this is what was
-    // distorting the photo, independent of whatever aspect-ratio the CSS
-    // box itself had (changing that alone couldn't have fixed it).
-    // OrthographicCamera has no built-in `aspect` the way PerspectiveCamera
-    // does, so left/right are set manually here and kept in sync on resize.
-    const getAspect = () => container.clientWidth / container.clientHeight
-    const camera = new THREE.OrthographicCamera(-getAspect(), getAspect(), 1, -1, 0, 1)
+    // A fixed -1..1 frustum and a 2x2 quad: the quad always fills the canvas
+    // exactly, whatever its shape. Keeping the photo undistorted is the
+    // shader's job (uUvScale), not the geometry's.
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
 
     const uniforms = {
       uTexture:  { value: null },
       uStrength: { value: 0.0 },
+      uUvScale:  { value: new THREE.Vector2(1, 1) },
     }
 
-    // Scaled on the x-axis to exactly fill the camera's frustum (width
-    // 2*aspect, height 2) — full-bleed with no gaps and no cropping, which
-    // only stays undistorted because the canvas's CSS aspect-ratio (4/5,
-    // see .about-photo in index.css) matches the source photo's own ratio.
-    const mesh = new THREE.Mesh(
+    scene.add(new THREE.Mesh(
       new THREE.PlaneGeometry(2, 2),
       new THREE.ShaderMaterial({ uniforms, vertexShader, fragmentShader })
-    )
-    mesh.scale.x = getAspect()
-    scene.add(mesh)
+    ))
+
+    // The canvas box is sized by CSS alone (.about-photo in index.css: width
+    // 100% of its container, aspect-ratio 4/5). The drawing buffer follows
+    // that box — never the other way round. `false` stops Three from writing
+    // an inline width/height on the canvas: that used to freeze the height at
+    // its first measurement, so any later change of width (web fonts landing,
+    // rotating a phone, resizing the window) left a box with the wrong ratio
+    // and a stretched photo.
+    let imageAspect = 4 / 5 // replaced by the real value once the photo loads
+    const fit = () => {
+      const w = canvas.clientWidth
+      const h = canvas.clientHeight
+      if (!w || !h) return
+      renderer.setSize(w, h, false)
+      const boxAspect = w / h
+      if (boxAspect > imageAspect) uniforms.uUvScale.value.set(1, imageAspect / boxAspect)
+      else uniforms.uUvScale.value.set(boxAspect / imageAspect, 1)
+      // setSize clears the buffer; redraw now rather than flash until the next frame
+      if (uniforms.uTexture.value) renderer.render(scene, camera)
+    }
+    // Fires for every change of the box, not only window resizes.
+    const resizeObserver = new ResizeObserver(fit)
+    resizeObserver.observe(canvas)
+    fit()
 
     let frameId
 
     new THREE.TextureLoader().load(canvas.getAttribute('data-src'), (texture) => {
       uniforms.uTexture.value = texture
+      imageAspect = texture.image.width / texture.image.height
+      fit()
       const animate = () => {
         frameId = requestAnimationFrame(animate)
         renderer.render(scene, camera)
@@ -90,19 +108,9 @@ export default function useProfileEffect() {
     canvas.addEventListener('mouseenter', onMouseEnter)
     canvas.addEventListener('mouseleave', onMouseLeave)
 
-    const onResize = () => {
-      renderer.setSize(container.clientWidth, container.clientHeight)
-      const aspect = getAspect()
-      camera.left = -aspect
-      camera.right = aspect
-      camera.updateProjectionMatrix()
-      mesh.scale.x = aspect
-    }
-    window.addEventListener('resize', onResize)
-
     return () => {
       cancelAnimationFrame(frameId)
-      window.removeEventListener('resize', onResize)
+      resizeObserver.disconnect()
       canvas.removeEventListener('mouseenter', onMouseEnter)
       canvas.removeEventListener('mouseleave', onMouseLeave)
       renderer.dispose()

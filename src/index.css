@@ -701,11 +701,9 @@ html, body {
 
 .about-photo {
   width: 100%;
-  /* Matches Profile.jpg's actual pixel size (896x1120 = 4:5). The shader in
-     useProfileEffect.js draws the texture as a full-bleed quad with no
-     aspect correction, so a box ratio that doesn't match the source image
-     visibly stretches it — this was doing that at every width, not just on
-     mobile. */
+  /* Matches Profile.jpg's actual pixel size (896x1120 = 4:5). This CSS box
+     is the single source of truth for the photo's size: useProfileEffect.js
+     only follows it (and crops, never stretches, if the two ever differ). */
   aspect-ratio: 4 / 5;
   display: block;
   cursor: crosshair;
@@ -2232,6 +2230,9 @@ html, body {
        longer needs to shrink on shorter screens. */
     width: min(38ch, 100%);
     max-width: none; /* the desktop height cap does not apply: this layout scrolls */
+    /* This column is often taller than the section; without this the flex
+       algorithm is free to squash the photo to make things fit. */
+    flex-shrink: 0;
   }
 
   /* Projects (mobile/tablet): "03" in the section's top-left corner, the
