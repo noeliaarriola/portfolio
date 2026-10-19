@@ -149,6 +149,15 @@ export default function SectionProjects() {
         </div>
 
         <div className="col-center">
+          {/* Mobile/tablet only (hidden on desktop, where col-left carries the
+              number and label): the side rails fold away below 900px, so the
+              section number moves to the top-left corner and the label
+              becomes the section's centred title, with a hint as subtitle. */}
+          <span className="sec-num mobile-sec-num" aria-hidden="true">03</span>
+          <div className="projects-mobile-head">
+            <h2 className="projects-mobile-title">{t.projects.selectedWork}</h2>
+            <p className="projects-mobile-hint">{t.projects.tapHint}</p>
+          </div>
           <div className="projects-list">
             {projects.map((project) => (
               <ProjectRow

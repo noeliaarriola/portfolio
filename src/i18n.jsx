@@ -36,6 +36,7 @@ const DICT = {
     projects: {
       selectedWork: 'SELECTED WORK',
       moreSoon: 'MORE PROJECTS SOON',
+      tapHint: 'Tap a project to open its case study',
       subtitles: {
         'Cleear Cosmetics': 'Creating a cohesive e-commerce experience for a growing beauty brand',
         'Powersis': 'Building the digital foundation for a growing engineering company',
@@ -100,6 +101,7 @@ const DICT = {
     projects: {
       selectedWork: 'TRABAJO SELECCIONADO',
       moreSoon: 'MÁS PROYECTOS PRONTO',
+      tapHint: 'Toca un proyecto para ver su caso de estudio',
       subtitles: {
         'Cleear Cosmetics': 'Creando una experiencia de e-commerce coherente para una marca de belleza en crecimiento',
         'Powersis': 'Construyendo la base digital de una empresa de ingeniería en crecimiento',
@@ -164,6 +166,7 @@ const DICT = {
     projects: {
       selectedWork: 'TRABALHOS SELECIONADOS',
       moreSoon: 'MAIS PROJETOS EM BREVE',
+      tapHint: 'Toque em um projeto para ver o estudo de caso',
       subtitles: {
         'Cleear Cosmetics': 'Criando uma experiência de e-commerce coesa para uma marca de beleza em crescimento',
         'Powersis': 'Construindo a base digital de uma empresa de engenharia em crescimento',

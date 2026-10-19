@@ -43,6 +43,8 @@ export default function SectionAbout() {
       </div>
 
       <div className="col-center">
+        {/* below 900px the side rails fold away: the number moves here (index.css, .mobile-sec-num) */}
+        <span className="sec-num mobile-sec-num" aria-hidden="true">02</span>
         <div className="about-text-container">
           <h2 className="section-headline">
             {withBreaks(t.about.headlinePre)}<em>{t.about.headlineEm}</em>

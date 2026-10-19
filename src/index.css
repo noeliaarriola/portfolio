@@ -719,6 +719,11 @@ html, body {
   margin-top: 20px;
 }
 
+/* Mobile-only: each section's number (top-left corner of the section) and
+   the projects section's title. On desktop they live in col-left. */
+.mobile-sec-num,
+.projects-mobile-head { display: none; }
+
 .projects-list {
   display: flex;
   flex-direction: column;
@@ -2229,27 +2234,81 @@ html, body {
     max-width: none; /* the desktop height cap does not apply: this layout scrolls */
   }
 
-  /* Projects list: number · info · thumb (row itself is the tap target) */
-  /* clamp() lower bounds are the phone sizes; tablets scale up from there */
-  .project-row {
-    grid-template-columns: clamp(34px, 7vw, 60px) 1fr clamp(96px, 26vw, 240px);
-    min-height: clamp(96px, 15vw, 132px);
+  /* Projects (mobile/tablet): "03" in the section's top-left corner, the
+     label as a large centred title, then only the four cover banners,
+     stacked. Number, name, tags and "+" of each row are hidden; the banner is
+     the tap target (its <img alt> keeps the project name for screen
+     readers). Every banner uses the covers' own 1380x390 ratio, so they read
+     as the same size. The section has no native scroll, so the banner width
+     is also capped by the screen height: title + four banners always fit (a
+     phone held in landscape gets narrower banners instead of clipped ones). */
+  #sec-3 .col-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 0 6%;
   }
+  /* Same hierarchy in every section: number in the top-left corner, then a
+     large centred title (same size everywhere), then the content. */
+  .mobile-sec-num {
+    display: block;
+    position: absolute;
+    top: 20px;
+    left: 6%;
+  }
+  /* the About content starts at the top (it scrolls), so leave room for the number */
+  #sec-2 .col-center { padding-top: max(15%, 84px); }
+  .projects-mobile-head {
+    display: block;
+    text-align: center;
+  }
+  .projects-mobile-hint {
+    margin: 10px 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0.6;
+  }
+  .projects-mobile-title {
+    display: block;
+    margin: 0;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: clamp(1.9rem, 7vw, 3.4rem); /* same as the About and Contact titles */
+    font-weight: 700;
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+  }
+  .projects-list {
+    height: auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .project-row {
+    display: block;
+    width: min(100%, calc((100vh - 290px) / 4 * 1380 / 390));
+    width: min(100%, calc((100svh - 290px) / 4 * 1380 / 390));
+    aspect-ratio: 1380 / 390;
+    min-height: 0;
+    border-bottom: none;
+  }
+  .project-row:first-child { border-top: none; }
+  .project-num,
+  .project-main,
   .project-open { display: none; }
-  .project-num { font-size: clamp(13px, 2vw, 16px); padding-left: 6px; }
-  .project-name { font-size: clamp(17px, 2.7vw, 22px); }
-  .project-main { padding: 14px 12px 14px 0; gap: 6px; }
-  .project-tag,
-  .project-year { font-size: clamp(8px, 1.3vw, 10px); }
+  .project-thumb { height: 100%; }
   .project-hover-preview { display: none; }
   .project-wall { display: none; }
 
   /* Contact */
   .contact-container { left: 6%; width: 88%; }
   .contact-container { max-width: 680px; }
-  .contact-headline { font-size: clamp(2rem, 8vw, 3.4rem); margin-bottom: 32px; }
+  .contact-container { text-align: center; }
+  .contact-headline { font-size: clamp(1.9rem, 7vw, 3.4rem); margin-bottom: 32px; }
   .contact-links { gap: 18px; padding-top: 22px; }
-  .link-item { grid-template-columns: 84px 1fr; }
+  /* centred like the rest of the mobile sections: label above its link */
+  .link-item { grid-template-columns: 1fr; justify-items: center; gap: 4px; }
   .link-label { font-size: 10px; }
   .contact-link { font-size: clamp(15px, 2.3vw, 18px); word-break: break-word; }
 }
@@ -2262,8 +2321,16 @@ html, body {
   .hero-tagline { margin-top: 0.5em; }
   .hero-cta { margin-top: 14px; }
 
-  .project-row { min-height: 0; }
-  .project-main { padding: 8px 12px 8px 0; gap: 4px; }
+
+  #sec-3 .col-center { gap: 10px; }
+  .mobile-sec-num { top: 10px; }
+  .projects-mobile-title { font-size: 1.4rem; }
+  .projects-mobile-hint { display: none; }
+  .projects-list { gap: 8px; }
+  .project-row {
+    width: min(100%, calc((100vh - 190px) / 4 * 1380 / 390));
+    width: min(100%, calc((100svh - 190px) / 4 * 1380 / 390));
+  }
 
   .contact-headline { margin-bottom: 18px; }
   .contact-links { gap: 12px; padding-top: 16px; }

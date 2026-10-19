@@ -24,6 +24,8 @@ export default function SectionContact() {
       </div>
 
       <div className="col-center">
+        {/* below 900px the side rails fold away: the number moves here (index.css, .mobile-sec-num) */}
+        <span className="sec-num mobile-sec-num" aria-hidden="true">04</span>
         <div className="contact-container">
           <h2 className="contact-headline">
             {withBreaks(t.contact.headlinePre)}<em>{t.contact.headlineEm}</em>
