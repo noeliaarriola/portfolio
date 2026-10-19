@@ -2,6 +2,10 @@
 import { Fragment } from 'react'
 import { useT } from '../i18n.jsx'
 
+// "↗" followed by U+FE0E (text presentation): without it some phones draw
+// the arrow as a colour emoji. Hidden on mobile anyway (index.css).
+const Arrow = () => <span className="link-arrow" aria-hidden="true">{'\u2197\uFE0E'}</span>
+
 function withBreaks(text) {
   const parts = text.split('\n')
   return parts.map((part, i) => (
@@ -34,7 +38,7 @@ export default function SectionContact() {
             <div className="link-item">
               <span className="link-label">{t.contact.email}</span>
               <a href="mailto:noelia.arriola.03@gmail.com" className="contact-link">
-                {t.contact.contactMe}
+                {t.contact.contactMe} <Arrow />
               </a>
             </div>
             <div className="link-item">
@@ -45,7 +49,7 @@ export default function SectionContact() {
                 rel="noreferrer"
                 className="contact-link"
               >
-                linkedin.com/in/noelialimp ↗
+                linkedin.com/in/noelialimp <Arrow />
               </a>
             </div>
           </div>

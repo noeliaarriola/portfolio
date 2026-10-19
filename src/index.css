@@ -2308,6 +2308,7 @@ html, body {
   .contact-links { gap: 18px; padding-top: 22px; }
   /* centred like the rest of the mobile sections: label above its link */
   .link-item { grid-template-columns: 1fr; justify-items: center; gap: 4px; }
+  .link-arrow { display: none; } /* phones drew it as an emoji */
   .link-label { font-size: 10px; }
   .contact-link { font-size: clamp(15px, 2.3vw, 18px); word-break: break-word; }
 }

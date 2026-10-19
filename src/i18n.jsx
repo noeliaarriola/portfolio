@@ -30,7 +30,7 @@ const DICT = {
       headlineEm: 'meaningful.',
       email: 'EMAIL',
       linkedin: 'LINKEDIN',
-      contactMe: 'contact me ↗',
+      contactMe: 'contact me',
       backToTop: 'BACK TO TOP ●',
     },
     projects: {
@@ -97,7 +97,7 @@ const DICT = {
       headlineEm: 'con sentido.',
       email: 'EMAIL',
       linkedin: 'LINKEDIN',
-      contactMe: 'escríbeme ↗',
+      contactMe: 'escríbeme',
       backToTop: 'VOLVER ARRIBA ●',
     },
     projects: {
@@ -164,7 +164,7 @@ const DICT = {
       headlineEm: 'com significado.',
       email: 'EMAIL',
       linkedin: 'LINKEDIN',
-      contactMe: 'fale comigo ↗',
+      contactMe: 'fale comigo',
       backToTop: 'VOLTAR AO TOPO ●',
     },
     projects: {
