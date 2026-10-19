@@ -138,10 +138,10 @@ export default function useScrollAnimations() {
     // enters from the bottom-left corner and the cranes fly off the right
     // edge, like on desktop. Its placement is measured, not hard-coded:
     // a sample of its vertices is projected at the rendered rotation, then
-    // the group is shifted so its left edge sits at the screen's left edge
-    // and its top just below the links (so it never covers them), whatever
-    // the phone's size or the length of the text above. On short phones it
-    // is scaled down until it fits between the links and the bottom edge.
+    // the group is drawn very large (6.5x the half-width) and shifted so its
+    // bottom-left corner sits just past the screen's bottom-left corner. It
+    // may pass behind the links (as on desktop); on short phones it is
+    // scaled down only as much as needed to stay below the title.
     const CRANE_ROTATION = [-0.15, -Math.PI * 0.1, 0.10] // what animate() renders with no pointer
     let craneSample = null
     const craneProbe = new THREE.Object3D()
@@ -153,6 +153,7 @@ export default function useScrollAnimations() {
       craneProbe.updateMatrixWorld(true)
       camera.updateMatrixWorld()
       let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+      let visibleMaxY = -Infinity // top of the part that is inside the screen
       for (let i = 0; i < craneSample.length; i += 3) {
         probeVec.set(craneSample[i], craneSample[i + 1], craneSample[i + 2])
           .applyMatrix4(craneProbe.matrixWorld).project(camera)
@@ -160,17 +161,19 @@ export default function useScrollAnimations() {
         if (probeVec.x > maxX) maxX = probeVec.x
         if (probeVec.y < minY) minY = probeVec.y
         if (probeVec.y > maxY) maxY = probeVec.y
+        if (probeVec.x >= -1 && probeVec.x <= 1 && probeVec.y > visibleMaxY) visibleMaxY = probeVec.y
       }
-      return { minX, maxX, minY, maxY }
+      return { minX, maxX, minY, maxY, visibleMaxY }
     }
-    // Bottom of the contact links, in the canvas's normalised (-1..1) y.
-    const linksBottomNdc = () => {
+    // Top of the contact links (the divider under the title), in the
+    // canvas's normalised (-1..1) y: the crane may pass behind the links,
+    // like on desktop, but never reaches the title.
+    const linksTopNdc = () => {
       const links = document.querySelector('#sec-4 .contact-links')
-      if (!links) return -0.3
+      if (!links) return 0
       const c = container.getBoundingClientRect()
       const l = links.getBoundingClientRect()
-      const gap = 24
-      return 1 - 2 * ((l.bottom + gap - c.top) / c.height)
+      return 1 - 2 * ((l.top - c.top) / c.height)
     }
     const getCranePos = () => {
       const { halfW, halfH } = getFrustumHalfExtents()
@@ -179,21 +182,29 @@ export default function useScrollAnimations() {
       if (!window.matchMedia('(max-width: 900px)').matches) {
         return { x: halfW * 0.15, y: -halfH * 0.4, scale: 5.8 }
       }
-      let scale = Math.min(halfW * 3.8, halfH * 1.9)
+      let scale = halfW * 6.5
       if (!craneSample) return { x: halfW * 0.5, y: -halfH * 0.75, scale }
-      const left = -0.97
-      const top = Math.min(linksBottomNdc(), -0.2)
-      // short phones: shrink just enough for the hand to stay on screen
-      // (it may only bleed slightly past the bottom edge)
-      const available = top - -1.04
-      const b0 = projectedBounds(scale, 0, 0)
-      const tall = b0.maxY - b0.minY
-      if (tall > available) scale *= available / tall
+      // bottom-left anchor: the hand bleeds a little past the bottom-left
+      // corner and the cranes fly up and off the right edge
+      const left = -1.12
+      const bottom = -1.12
+      const top = linksTopNdc()
       let x = 0, y = 0
-      for (let i = 0; i < 3; i++) { // converges in 2-3 steps (perspective)
-        const b = projectedBounds(scale, x, y)
-        x += (left - b.minX) * halfW
-        y += (top - b.maxY) * halfH
+      const place = () => {
+        for (let i = 0; i < 3; i++) { // converges in 2-3 steps (perspective)
+          const b = projectedBounds(scale, x, y)
+          x += (left - b.minX) * halfW
+          y += (bottom - b.minY) * halfH
+        }
+      }
+      place()
+      // short phones: what is on screen must stay below the title, so shrink
+      // only as much as that needs
+      for (let i = 0; i < 3; i++) {
+        const { visibleMaxY } = projectedBounds(scale, x, y)
+        if (visibleMaxY <= top + 0.01) break
+        scale *= (top - bottom) / (visibleMaxY - bottom)
+        place()
       }
       return { x, y, scale }
     }
