@@ -134,7 +134,8 @@ export default function useScrollAnimations() {
     // Desktop: right of centre, below the contact links, large (it bleeds off
     // the right edge on purpose). Below 900px the side rails are gone and the
     // contact block is centred, so the whole composition (hand + cranes) is
-    // scaled to fit — at most 88% of the width and 24% of the height — and
+    // scaled to the screen — about the full width (it bleeds slightly off
+    // the sides, like on desktop) and at most 28% of the height — and
     // centred horizontally in the free space under the links. The 0.038 /
     // 0.0275 terms re-centre the model: its projected bounds are slightly
     // off its origin (measured by projecting every vertex at the rendered
@@ -146,8 +147,8 @@ export default function useScrollAnimations() {
       if (!window.matchMedia('(max-width: 900px)').matches) {
         return { x: halfW * 0.15, y: -halfH * 0.4, scale: 5.8 }
       }
-      const scale = Math.min(halfW * 1.92, halfH * 0.945)
-      return { x: -0.038 * scale, y: -halfH * 0.68 + 0.0275 * scale, scale }
+      const scale = Math.min(halfW * 2.4, halfH * 1.11)
+      return { x: -0.038 * scale, y: -halfH * 0.66 + 0.0275 * scale, scale }
     }
     {
       const p = getGlobePos()
