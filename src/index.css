@@ -2300,7 +2300,10 @@ html, body {
   /* Contact */
   .contact-container { left: 6%; width: 88%; }
   .contact-container { max-width: 680px; }
-  .contact-container { text-align: center; }
+  /* centred like the rest of the mobile sections, and raised a little so the
+     origami crane gets the lower part of the screen (useScrollAnimations.js
+     sizes it to the space left under the links) */
+  .contact-container { text-align: center; top: 40%; }
   .contact-headline { font-size: clamp(1.9rem, 7vw, 3.4rem); margin-bottom: 32px; }
   .contact-links { gap: 18px; padding-top: 22px; }
   /* centred like the rest of the mobile sections: label above its link */
@@ -2328,6 +2331,7 @@ html, body {
     width: min(100%, calc((100svh - 190px) / 4 * 1380 / 390));
   }
 
+  .contact-container { top: 50%; } /* no room to spare for the crane here */
   .contact-headline { margin-bottom: 18px; }
   .contact-links { gap: 12px; padding-top: 16px; }
 }

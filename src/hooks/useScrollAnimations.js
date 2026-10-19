@@ -132,14 +132,46 @@ export default function useScrollAnimations() {
 
     // World-space position and scale for the crane.
     // Desktop: right of centre, below the contact links, large (it bleeds off
-    // the right edge on purpose). Below 900px the side rails are gone and the
-    // contact block is centred, so the whole composition (hand + cranes) is
-    // scaled to the screen — about the full width (it bleeds slightly off
-    // the sides, like on desktop) and at most 28% of the height — and
-    // centred horizontally in the free space under the links. The 0.038 /
-    // 0.0275 terms re-centre the model: its projected bounds are slightly
-    // off its origin (measured by projecting every vertex at the rendered
-    // rotation, then checked against a screenshot).
+    // the right edge on purpose).
+    // Below 900px the side rails are gone and the contact block is centred:
+    // the crane is drawn large in the free space under the links — the hand
+    // enters from the bottom-left corner and the cranes fly off the right
+    // edge, like on desktop. Its placement is measured, not hard-coded:
+    // a sample of its vertices is projected at the rendered rotation, then
+    // the group is shifted so its left edge sits at the screen's left edge
+    // and its top just below the links (so it never covers them), whatever
+    // the phone's size or the length of the text above. On short phones it
+    // is scaled down until it fits between the links and the bottom edge.
+    const CRANE_ROTATION = [-0.15, -Math.PI * 0.1, 0.10] // what animate() renders with no pointer
+    let craneSample = null
+    const craneProbe = new THREE.Object3D()
+    const probeVec = new THREE.Vector3()
+    const projectedBounds = (scale, x, y) => {
+      craneProbe.position.set(x, y, 0)
+      craneProbe.rotation.set(...CRANE_ROTATION)
+      craneProbe.scale.setScalar(scale)
+      craneProbe.updateMatrixWorld(true)
+      camera.updateMatrixWorld()
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+      for (let i = 0; i < craneSample.length; i += 3) {
+        probeVec.set(craneSample[i], craneSample[i + 1], craneSample[i + 2])
+          .applyMatrix4(craneProbe.matrixWorld).project(camera)
+        if (probeVec.x < minX) minX = probeVec.x
+        if (probeVec.x > maxX) maxX = probeVec.x
+        if (probeVec.y < minY) minY = probeVec.y
+        if (probeVec.y > maxY) maxY = probeVec.y
+      }
+      return { minX, maxX, minY, maxY }
+    }
+    // Bottom of the contact links, in the canvas's normalised (-1..1) y.
+    const linksBottomNdc = () => {
+      const links = document.querySelector('#sec-4 .contact-links')
+      if (!links) return -0.3
+      const c = container.getBoundingClientRect()
+      const l = links.getBoundingClientRect()
+      const gap = 24
+      return 1 - 2 * ((l.bottom + gap - c.top) / c.height)
+    }
     const getCranePos = () => {
       const { halfW, halfH } = getFrustumHalfExtents()
       // same breakpoint as the CSS (the canvas container is narrower than the
@@ -147,8 +179,23 @@ export default function useScrollAnimations() {
       if (!window.matchMedia('(max-width: 900px)').matches) {
         return { x: halfW * 0.15, y: -halfH * 0.4, scale: 5.8 }
       }
-      const scale = Math.min(halfW * 2.4, halfH * 1.11)
-      return { x: -0.038 * scale, y: -halfH * 0.66 + 0.0275 * scale, scale }
+      let scale = Math.min(halfW * 3.8, halfH * 1.9)
+      if (!craneSample) return { x: halfW * 0.5, y: -halfH * 0.75, scale }
+      const left = -0.97
+      const top = Math.min(linksBottomNdc(), -0.2)
+      // short phones: shrink just enough for the hand to stay on screen
+      // (it may only bleed slightly past the bottom edge)
+      const available = top - -1.04
+      const b0 = projectedBounds(scale, 0, 0)
+      const tall = b0.maxY - b0.minY
+      if (tall > available) scale *= available / tall
+      let x = 0, y = 0
+      for (let i = 0; i < 3; i++) { // converges in 2-3 steps (perspective)
+        const b = projectedBounds(scale, x, y)
+        x += (left - b.minX) * halfW
+        y += (top - b.maxY) * halfH
+      }
+      return { x, y, scale }
     }
     {
       const p = getGlobePos()
@@ -183,6 +230,13 @@ export default function useScrollAnimations() {
     // Shared by both sources: positions are line-segment vertices already
     // centred and scaled to a unit cube.
     const buildCrane = (positions) => {
+      // every 15th vertex is plenty to measure where it lands on screen
+      craneSample = new Float32Array(Math.floor(positions.length / 45) * 3)
+      for (let i = 0, j = 0; j < craneSample.length; i += 45, j += 3) {
+        craneSample[j] = positions[i]
+        craneSample[j + 1] = positions[i + 1]
+        craneSample[j + 2] = positions[i + 2]
+      }
       craneMaterial = new THREE.LineBasicMaterial({
         color: threeColor(),
         transparent: true,
