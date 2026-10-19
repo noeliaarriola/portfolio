@@ -2249,7 +2249,7 @@ html, body {
     align-items: center;
     justify-content: center;
     gap: 28px;
-    padding: 0 6%;
+    padding: 0; /* banners run edge to edge; the title keeps its own margin */
   }
   /* Same hierarchy in every section: number in the top-left corner, then a
      large centred title (same size everywhere), then the content. */
@@ -2264,6 +2264,7 @@ html, body {
   .projects-mobile-head {
     display: block;
     text-align: center;
+    padding: 0 6%;
   }
   .projects-mobile-hint {
     margin: 10px 0 0;
@@ -2276,15 +2277,15 @@ html, body {
     display: block;
     margin: 0;
   }
+  /* banners: the full width of the screen, touching each other */
   .projects-list {
     height: auto;
     align-items: center;
-    gap: 12px;
+    gap: 0;
   }
   .project-row {
     display: block;
-    width: min(100%, calc((100vh - 290px) / 4 * 1380 / 390));
-    width: min(100%, calc((100svh - 290px) / 4 * 1380 / 390));
+    width: 100%;
     aspect-ratio: 1380 / 390;
     min-height: 0;
     border-bottom: none;
@@ -2326,7 +2327,7 @@ html, body {
   .mobile-sec-num { top: 10px; }
   .projects-mobile-title { font-size: 1.4rem; }
   .projects-mobile-hint { display: none; }
-  .projects-list { gap: 8px; }
+  .projects-list { gap: 0; }
   .project-row {
     width: min(100%, calc((100vh - 190px) / 4 * 1380 / 390));
     width: min(100%, calc((100svh - 190px) / 4 * 1380 / 390));

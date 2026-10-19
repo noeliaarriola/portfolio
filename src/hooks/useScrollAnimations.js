@@ -134,14 +134,12 @@ export default function useScrollAnimations() {
     // Desktop: right of centre, below the contact links, large (it bleeds off
     // the right edge on purpose).
     // Below 900px the side rails are gone and the contact block is centred:
-    // the crane is drawn large in the free space under the links — the hand
-    // enters from the bottom-left corner and the cranes fly off the right
-    // edge, like on desktop. Its placement is measured, not hard-coded:
-    // a sample of its vertices is projected at the rendered rotation, then
-    // the group is drawn very large (4.6x the half-width) and shifted so its
-    // bottom-left corner sits just past the screen's bottom-left corner. It
-    // may pass behind the links (as on desktop); on short phones it is
-    // scaled down only as much as needed to stay below the title.
+    // the crane fills the lower part of the screen. Its placement is
+    // measured, not hard-coded: a sample of its vertices is projected at the
+    // rendered rotation, and it is scaled and shifted so that 85% of it is on
+    // screen — the cranes fully, the base of the hand running off the
+    // bottom-left corner — and never reaches the title. Works for any phone
+    // size and any length of text above.
     const CRANE_ROTATION = [-0.15, -Math.PI * 0.1, 0.10] // what animate() renders with no pointer
     let craneSample = null
     const craneProbe = new THREE.Object3D()
@@ -182,29 +180,37 @@ export default function useScrollAnimations() {
       if (!window.matchMedia('(max-width: 900px)').matches) {
         return { x: halfW * 0.15, y: -halfH * 0.4, scale: 5.8 }
       }
-      let scale = halfW * 4.6
-      if (!craneSample) return { x: halfW * 0.5, y: -halfH * 0.75, scale }
-      // bottom-left anchor: the hand bleeds a little past the bottom-left
-      // corner and the cranes fly up and off the right edge
-      const left = -1.12
-      const bottom = -1.12
-      const top = linksTopNdc()
+      if (!craneSample) return { x: halfW * 0.5, y: -halfH * 0.75, scale: halfW * 4 }
+      // 85% of the model's on-screen bounding box inside the screen: the cut
+      // is split between the left and the bottom (r each, (1-r)^2 = 0.85), so
+      // only the base of the hand runs off the bottom-left corner. The right
+      // edge (the cranes) stays on screen.
+      const r = 1 - Math.sqrt(0.85)
+      const right = 0.97
+      const titleLimit = linksTopNdc()
+      let scale = halfW * 2.5
       let x = 0, y = 0
-      const place = () => {
-        for (let i = 0; i < 3; i++) { // converges in 2-3 steps (perspective)
+      for (let i = 0; i < 4; i++) {
+        // scale so the visible width (from the screen's left edge to `right`)
+        // is (1 - r) of the model's width
+        const b0 = projectedBounds(scale, x, y)
+        scale *= ((right + 1) / (1 - r)) / (b0.maxX - b0.minX)
+        for (let j = 0; j < 3; j++) { // converges in 2-3 steps (perspective)
           const b = projectedBounds(scale, x, y)
-          x += (left - b.minX) * halfW
-          y += (bottom - b.minY) * halfH
+          x += (right - b.maxX) * halfW
+          y += (-1 - r * (b.maxY - b.minY) - b.minY) * halfH
         }
       }
-      place()
-      // short phones: what is on screen must stay below the title, so shrink
-      // only as much as that needs
+      // short phones: never reach the title
       for (let i = 0; i < 3; i++) {
-        const { visibleMaxY } = projectedBounds(scale, x, y)
-        if (visibleMaxY <= top + 0.01) break
-        scale *= (top - bottom) / (visibleMaxY - bottom)
-        place()
+        const b = projectedBounds(scale, x, y)
+        if (b.maxY <= titleLimit) break
+        scale *= (titleLimit + 1) / (b.maxY + 1)
+        for (let j = 0; j < 3; j++) {
+          const c = projectedBounds(scale, x, y)
+          x += (right - c.maxX) * halfW
+          y += (-1 - r * (c.maxY - c.minY) - c.minY) * halfH
+        }
       }
       return { x, y, scale }
     }
