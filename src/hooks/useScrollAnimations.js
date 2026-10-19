@@ -32,9 +32,14 @@ export default function useScrollAnimations() {
     const saveData     = navigator.connection?.saveData === true
     const lowMemory    = (navigator.deviceMemory ?? 8) < 4
     // The crane is an 11 MB GLB whose edge extraction walks ~900K triangles,
-    // all to draw a 0.2-opacity wireframe on section 4. Not worth that on a
-    // phone, on a metered connection, or when motion is unwanted.
-    const skipCrane = isNarrow || saveData || lowMemory || reduceMotion
+    // all to draw a faint wireframe on section 4. Phones and tablets get a
+    // pre-extracted light version instead (public/origami_crane_mobile.bin,
+    // ~600 KB: the same fold lines, already normalised, nothing to compute).
+    // Skipped entirely on a metered connection, low memory or reduced motion.
+    const skipCrane = saveData || lowMemory || reduceMotion
+    const useLightCrane = isNarrow
+    // a small wireframe on a phone needs more ink than the large desktop one
+    const craneMaxOpacity = isNarrow ? 0.35 : 0.2
 
     // ─── Three.js Scene ───────────────────────────────────────────────────────
     const canvas = document.getElementById('three-canvas')
@@ -125,10 +130,24 @@ export default function useScrollAnimations() {
       return { x: aspect * 1.2, y: -1.7 }
     }
 
-    // World-space position for the crane — right-center so it's fully visible
+    // World-space position and scale for the crane.
+    // Desktop: right of centre, below the contact links, large (it bleeds off
+    // the right edge on purpose). Below 900px the side rails are gone and the
+    // contact block is centred, so the whole composition (hand + cranes) is
+    // scaled to fit — at most 88% of the width and 24% of the height — and
+    // centred horizontally in the free space under the links. The 0.038 /
+    // 0.0275 terms re-centre the model: its projected bounds are slightly
+    // off its origin (measured by projecting every vertex at the rendered
+    // rotation, then checked against a screenshot).
     const getCranePos = () => {
       const { halfW, halfH } = getFrustumHalfExtents()
-      return { x: halfW * 0.15, y: -halfH * 0.4 }
+      // same breakpoint as the CSS (the canvas container is narrower than the
+      // window on desktop, so its own width can't be used for this)
+      if (!window.matchMedia('(max-width: 900px)').matches) {
+        return { x: halfW * 0.15, y: -halfH * 0.4, scale: 5.8 }
+      }
+      const scale = Math.min(halfW * 1.92, halfH * 0.945)
+      return { x: -0.038 * scale, y: -halfH * 0.68 + 0.0275 * scale, scale }
     }
     {
       const p = getGlobePos()
@@ -158,6 +177,55 @@ export default function useScrollAnimations() {
     // per animation frame with no further splitting needed.
     const CRANE_FRAME_BUDGET_MS = 8
     let craneRafId = null
+    let disposed = false
+
+    // Shared by both sources: positions are line-segment vertices already
+    // centred and scaled to a unit cube.
+    const buildCrane = (positions) => {
+      craneMaterial = new THREE.LineBasicMaterial({
+        color: threeColor(),
+        transparent: true,
+        opacity: 0,
+        linewidth: 1,
+      })
+      const geom = new THREE.BufferGeometry()
+      geom.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+      craneGroup = new THREE.Group()
+      craneGroup.add(new THREE.LineSegments(geom, craneMaterial))
+
+      const cp = getCranePos()
+      craneGroup.scale.setScalar(cp.scale)
+      craneGroup.rotation.set(1.2, -Math.PI * -0.75, 1.95)
+      craneBaseX = cp.x
+      craneBaseY = cp.y
+      craneGroup.position.set(cp.x, cp.y, 0)
+      scene.add(craneGroup)
+
+      // Snap opacity to current scroll position in case the user is already at sec-4
+      const p0 = window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
+      craneMaterial.opacity = Math.max(0, Math.min(1, (p0 - 0.85) / 0.15)) * craneMaxOpacity
+    }
+
+    // Phones/tablets: Int16 vertex triplets (value / 65534 = unit-cube coord),
+    // made offline from the GLB's fold edges and thinned to 50K segments.
+    const loadLightCrane = () => {
+      if (craneLoadStarted) return
+      craneLoadStarted = true
+      fetch('/origami_crane_mobile.bin')
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`)
+          return res.arrayBuffer()
+        })
+        .then((buf) => {
+          if (disposed) return
+          const q = new Int16Array(buf)
+          const positions = new Float32Array(q.length)
+          for (let i = 0; i < q.length; i++) positions[i] = q[i] / 65534
+          buildCrane(positions)
+        })
+        .catch((err) => console.warn('Crane (mobile) failed to load:', err))
+    }
 
     const loadCrane = () => {
       if (craneLoadStarted || !THREE.GLTFLoader) return
@@ -217,13 +285,6 @@ export default function useScrollAnimations() {
           const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, cz = (minZ + maxZ) / 2
           const span = Math.max(maxX - minX, maxY - minY, maxZ - minZ) || 1
 
-          craneMaterial = new THREE.LineBasicMaterial({
-            color: threeColor(),
-            transparent: true,
-            opacity: 0,
-            linewidth: 1,
-          })
-
           // Merge all wireframe geometries into ONE LineSegments — single draw call per frame.
           // Pre-size the buffer and copy in one pass per chunk instead of push()-ing
           // scalar-by-scalar (push() on a plain array is far slower at this scale).
@@ -238,23 +299,7 @@ export default function useScrollAnimations() {
               allPos[offset++] = (arr[i + 2] - cz) / span
             }
           }
-          const mergedGeom = new THREE.BufferGeometry()
-          mergedGeom.setAttribute('position', new THREE.BufferAttribute(allPos, 3))
-
-          craneGroup = new THREE.Group()
-          craneGroup.add(new THREE.LineSegments(mergedGeom, craneMaterial))
-
-          const cp = getCranePos()
-          craneGroup.scale.setScalar(5.8)
-          craneGroup.rotation.set(1.2, -Math.PI * -0.75, 1.95)
-          craneBaseX = cp.x
-          craneBaseY = cp.y
-          craneGroup.position.set(cp.x, cp.y, 0)
-          scene.add(craneGroup)
-
-          // Snap opacity to current scroll position in case the user is already at sec-4
-          const p0 = window.scrollY / Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
-          craneMaterial.opacity = Math.max(0, Math.min(1, (p0 - 0.85) / 0.15)) * 0.2
+          if (!disposed) buildCrane(allPos)
         }
 
         processFrame()
@@ -262,10 +307,12 @@ export default function useScrollAnimations() {
         console.warn('GLB failed to load:', err)
       })
     }
-    // Gated: see `skipCrane` above. On a phone this is the single biggest
-    // win — an 11 MB download and ~900K triangles of edge extraction that
-    // never happen at all.
-    if (!skipCrane) loadCrane()
+    // Gated: see `skipCrane` / `useLightCrane` above. On a phone the 11 MB
+    // download and ~900K triangles of edge extraction never happen at all.
+    if (!skipCrane) {
+      if (useLightCrane) loadLightCrane()
+      else loadCrane()
+    }
 
     // Update Three.js material colors when the theme changes
     const onThemeChange = (e) => {
@@ -296,10 +343,11 @@ export default function useScrollAnimations() {
         globe.scale.setScalar(getGlobeScale())
       }
       if (craneGroup) {
-        const { x, y } = getCranePos()
+        const { x, y, scale } = getCranePos()
         craneBaseX = x
         craneBaseY = y
         craneGroup.position.set(x, y, 0)
+        craneGroup.scale.setScalar(scale)
       }
     }
 
@@ -519,7 +567,7 @@ export default function useScrollAnimations() {
       navLinks.forEach((link, i) => link?.classList.toggle('active', i === idx))
       // Crane fades in during the last ~15% of scroll (roughly when sec-4 becomes visible)
       if (craneMaterial) {
-        craneMaterial.opacity = Math.max(0, Math.min(1, (progress - 0.85) / 0.15)) * 0.2
+        craneMaterial.opacity = Math.max(0, Math.min(1, (progress - 0.85) / 0.15)) * craneMaxOpacity
       }
     }
     window.addEventListener('scroll', onScroll)
@@ -558,6 +606,7 @@ export default function useScrollAnimations() {
     // ─── Cleanup on unmount ───────────────────────────────────────────────────
     // React StrictMode mounts/unmounts in dev; this prevents duplicated listeners.
     return () => {
+      disposed = true
       stopLoop()
       clearTimeout(resizeTimer)
       cancelAnimationFrame(previewFrame)
