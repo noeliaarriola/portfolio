@@ -138,7 +138,7 @@ export default function useScrollAnimations() {
     // enters from the bottom-left corner and the cranes fly off the right
     // edge, like on desktop. Its placement is measured, not hard-coded:
     // a sample of its vertices is projected at the rendered rotation, then
-    // the group is drawn very large (5.4x the half-width) and shifted so its
+    // the group is drawn very large (4.6x the half-width) and shifted so its
     // bottom-left corner sits just past the screen's bottom-left corner. It
     // may pass behind the links (as on desktop); on short phones it is
     // scaled down only as much as needed to stay below the title.
@@ -182,7 +182,7 @@ export default function useScrollAnimations() {
       if (!window.matchMedia('(max-width: 900px)').matches) {
         return { x: halfW * 0.15, y: -halfH * 0.4, scale: 5.8 }
       }
-      let scale = halfW * 5.4
+      let scale = halfW * 4.6
       if (!craneSample) return { x: halfW * 0.5, y: -halfH * 0.75, scale }
       // bottom-left anchor: the hand bleeds a little past the bottom-left
       // corner and the cranes fly up and off the right edge
