@@ -34,7 +34,8 @@ export default function useScrollAnimations() {
     // The crane is an 11 MB GLB whose edge extraction walks ~900K triangles,
     // all to draw a faint wireframe on section 4. Phones and tablets get a
     // pre-extracted light version instead (public/origami_crane_mobile.bin,
-    // ~600 KB: the same fold lines, already normalised, nothing to compute).
+    // ~1.1 MB: the model's real fold lines, already normalised, nothing to
+    // compute).
     // Skipped entirely on a metered connection, low memory or reduced motion.
     const skipCrane = saveData || lowMemory || reduceMotion
     const useLightCrane = isNarrow
@@ -54,10 +55,10 @@ export default function useScrollAnimations() {
     )
     camera.position.z = 5.2
 
-    // Antialiasing costs real fill rate on mobile GPUs and buys almost
-    // nothing on 1px wireframes. Capping the pixel ratio at 1.5 there roughly
-    // halves the fragment work versus the old flat cap of 2 on a 3x screen.
-    const maxDpr = () => (isNarrow || isCoarse ? 1.5 : 2)
+    // Pixel ratio capped at 2 everywhere (a 3x phone draws at 2x). It used to
+    // be 1.5 with no antialiasing on phones, which made the crane's thin
+    // lines visibly jagged; a wireframe scene is cheap enough for both.
+    const maxDpr = () => 2
 
     // A blocked or unavailable WebGL context throws here. That used to abort
     // the entire effect, so the GSAP timeline, nav links and CTA handlers were
@@ -67,7 +68,7 @@ export default function useScrollAnimations() {
     try {
       renderer = new THREE.WebGLRenderer({
         canvas,
-        antialias: !(isNarrow || isCoarse),
+        antialias: true,
         alpha: true,
         powerPreference: 'low-power',
       })
@@ -168,15 +169,13 @@ export default function useScrollAnimations() {
       }
       return { minX, maxX, minY, maxY, visibleMaxY }
     }
-    // Top of the contact links (the divider under the title), in the
-    // canvas's normalised (-1..1) y: the crane may pass behind the links,
-    // like on desktop, but never reaches the title.
-    const linksTopNdc = () => {
+    // Bottom of the contact links, in the canvas's normalised (-1..1) y.
+    const linksBottomNdc = () => {
       const links = document.querySelector('#sec-4 .contact-links')
-      if (!links) return 0
+      if (!links) return -0.3
       const c = container.getBoundingClientRect()
       const l = links.getBoundingClientRect()
-      return 1 - 2 * ((l.top - c.top) / c.height)
+      return 1 - 2 * ((l.bottom - c.top) / c.height)
     }
     const getCranePos = () => {
       const { halfW, halfH } = getFrustumHalfExtents()
@@ -194,7 +193,8 @@ export default function useScrollAnimations() {
       const cutLeft = 0.01
       const cutBottom = 0.08
       const right = 0.97
-      const titleLimit = linksTopNdc()
+      // never touches the text: stays below the links (with room for the sway)
+      const titleLimit = linksBottomNdc() - 0.05
       let scale = halfW * 2.5
       let x = 0, y = 0
       for (let i = 0; i < 4; i++) {
@@ -287,7 +287,8 @@ export default function useScrollAnimations() {
     }
 
     // Phones/tablets: Int16 vertex triplets (value / 65534 = unit-cube coord),
-    // made offline from the GLB's fold edges and thinned to 50K segments.
+    // made offline from the GLB: its crease edges (EdgesGeometry, 30°), whole
+    // lines, ~91K segments.
     const loadLightCrane = () => {
       if (craneLoadStarted) return
       craneLoadStarted = true
@@ -490,12 +491,18 @@ export default function useScrollAnimations() {
 
         // Crane: mouse parallax + position drift away from cursor
         if (craneGroup) {
+          // Touch screens have no pointer to follow, so the crane would sit
+          // still: a slow, small flight sway instead.
+          const t = isCoarse ? performance.now() / 1000 : 0
+          const swayY = isCoarse ? Math.sin(t * 0.5) * 0.12 : 0
+          const swayZ = isCoarse ? Math.sin(t * 0.37) * 0.035 : 0
+          const bob = isCoarse ? Math.sin(t * 0.8) * 0.03 : 0
           craneGroup.rotation.x = -0.15 + mouseY * 0.15
-          craneGroup.rotation.y = -Math.PI * 0.1 + mouseX * 0.25
-          craneGroup.rotation.z =  0.10 + craneTilt + mouseX * 0.10
+          craneGroup.rotation.y = -Math.PI * 0.1 + mouseX * 0.25 + swayY
+          craneGroup.rotation.z =  0.10 + craneTilt + mouseX * 0.10 + swayZ
           // Drift away from cursor so links are easier to reach
           craneGroup.position.x = craneBaseX - mouseX * 0.2
-          craneGroup.position.y = craneBaseY - mouseY * 0.15
+          craneGroup.position.y = craneBaseY - mouseY * 0.15 + bob
         }
       }
 
