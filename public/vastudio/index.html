@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<base href="/vastudio/">
+<title>Propuesta VA Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: escenario fijo de 1920×1080 (como en Figma) escalado al tamaño de la pantalla; una diapositiva visible a la vez. */
+:root {
+  --marsala: #955242;
+  --crema: #fee8d7;
+  --latte: #c89d8d;
+  --gris-calido: #e9e2dd;
+  --tinta: #150f0c;
+  --fondo: #ffffff;
+  --texto-2: #777472;
+  --texto-2-marsala: #e9cab9;
+  --display: "TAN - Angleton", "TAN Angleton", "Angleton", "Gilda Display", Georgia, serif;
+  --sans: "Source Sans 3", "Source Sans Pro", system-ui, sans-serif;
+  --ease: cubic-bezier(.22, .8, .24, 1);
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body { background: var(--tinta); color: var(--tinta); overflow: hidden; font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+/* ---------- escenario ---------- */
+.viewport { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden; touch-action: pan-y; }
+.stage { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px; transform-origin: center center; }
+.slide { position: absolute; inset: 0; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .7s var(--ease), visibility 0s linear .7s; }
+.slide.on { opacity: 1; visibility: visible; z-index: 2; transition: opacity .7s var(--ease), visibility 0s; }
+.slide.out { visibility: visible; z-index: 1; }
+.slide > * { position: absolute; margin: 0; }
+.bg-marsala { background: var(--marsala); }
+.bg-crema { background: var(--crema); }
+.bg-blanco { background: var(--fondo); }
+
+.full { left: 0; top: 0; width: 1920px; height: 1080px; }
+.glow { background: radial-gradient(1600px 900px at 537.6px 237.6px, rgba(255,255,255,.16), rgba(255,255,255,0)); }
+.shade { background: linear-gradient(to bottom, rgba(21,15,12,0), rgba(21,15,12,.22)); }
+.grad-crema { background: linear-gradient(to bottom, rgba(255,255,255,.55), rgba(255,255,255,0) 50%, rgba(233,226,221,.9)); }
+.grad-blanco { background: radial-gradient(1280px 720px at 1632px 1026px, rgba(254,232,215,.7), rgba(254,232,215,0)); }
+
+/* sombras de hojas */
+.leaves { display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.leaves .rot { flex: none; position: relative; }
+.leaves .sway { position: absolute; inset: -0.74% -1.72% -0.74% -2.37%; animation: sway 11s ease-in-out infinite alternate; transform-origin: 30% 60%; }
+.leaves .sway.slow { animation-duration: 14s; animation-delay: -4s; }
+.leaves img { display: block; width: 100%; height: 100%; max-width: none; }
+@keyframes sway { 0% { transform: rotate(-1.4deg) translate(-4px, 3px); } 100% { transform: rotate(1.8deg) translate(6px, -5px); } }
+
+/* tipografía (estilos VA Studio de Figma) */
+.lbl { font: 600 16px/1.4 var(--sans); letter-spacing: 4.16px; text-transform: uppercase; }
+.nota { font: 400 16px/1.4 var(--sans); }
+.cuerpo { font: 400 24px/1.5 var(--sans); }
+.cuerpo-g { font: 400 30px/1.45 var(--sans); }
+.t1 { font: 400 84px/1 var(--display); letter-spacing: -0.84px; }
+.t2 { font: 400 54px/1.06 var(--display); }
+.t3 { font: 400 38px/1.15 var(--display); }
+.disp { font: 400 136px/.94 var(--display); letter-spacing: -1.36px; }
+.c-crema { color: var(--crema); } .c-marsala { color: var(--marsala); } .c-tinta { color: var(--tinta); }
+.c-2 { color: var(--texto-2); } .c-2m { color: var(--texto-2-marsala); }
+.right { text-align: right; } .center { text-align: center; }
+.rule { height: 1px; }
+.r-marsala { background: var(--marsala); } .r-crema { background: var(--crema); } .r-tinta { background: var(--tinta); }
+.r-gris { background: var(--gris-calido); } .r-2m { background: var(--texto-2-marsala); }
+
+/* imágenes */
+.img { overflow: hidden; }
+.img > img { position: absolute; max-width: none; pointer-events: none; }
+.img.cover > img { inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.missing { background: repeating-linear-gradient(135deg, var(--latte) 0 14px, #c3968a 14px 28px) !important; }
+.missing > img { display: none; }
+.missing::after { content: attr(data-falta); position: absolute; inset: auto 0 24px; text-align: center; font: 600 14px/1.4 var(--sans); letter-spacing: 3px; text-transform: uppercase; color: var(--tinta); opacity: .7; }
+img.gone { visibility: hidden; }
+
+/* ---------- animaciones de entrada ---------- */
+.a { transition: opacity 1s var(--ease), transform 1.1s var(--ease), clip-path 1.2s var(--ease); transition-delay: calc(var(--d, 0) * 1ms + 200ms); }
+.js .slide:not(.on):not(.out) .a { transition: none; }
+.js .slide:not(.on):not(.out) [data-a="up"] { opacity: 0; transform: translateY(32px); }
+.js .slide:not(.on):not(.out) [data-a="fade"] { opacity: 0; }
+.js .slide:not(.on):not(.out) [data-a="line"] { transform: scaleX(0); }
+[data-a="line"] { transform-origin: left center; transition-duration: 1.3s; }
+.js .slide:not(.on):not(.out) [data-a="pop"] { opacity: 0; transform: scale(.2); }
+.js .slide:not(.on):not(.out) [data-a="zoom"] { opacity: 0; transform: scale(1.08); }
+[data-a="zoom"] { transition-duration: 1.4s, 2.4s; }
+.js .slide:not(.on):not(.out) [data-a="wipe-l"] { clip-path: inset(0 0 0 100%); }
+.js .slide:not(.on):not(.out) [data-a="wipe-r"] { clip-path: inset(0 100% 0 0); }
+[data-a="wipe-l"], [data-a="wipe-r"] { clip-path: inset(0 0 0 0); transition-duration: 1.2s; }
+.js .slide:not(.on):not(.out) [data-a="logo"] { opacity: 0; transform: translateY(18px) scale(.92); }
+[data-a="logo"] { transition-duration: 1.4s; }
+
+/* títulos palabra por palabra */
+.w { display: inline-block; overflow: hidden; vertical-align: top; padding: .16em .04em .18em; margin: -.16em -.04em -.18em; }
+.w > span { display: inline-block; transition: transform 1.1s var(--ease), opacity .8s var(--ease); transition-delay: calc(var(--d, 0) * 1ms + var(--i, 0) * 70ms + 200ms); }
+.js .slide:not(.on):not(.out) .w > span { transform: translateY(110%); opacity: 0; transition: none; }
+
+/* línea de tiempo (diapositiva 6) */
+.marker { border-radius: 50%; }
+.marker img { width: 100%; height: 100%; display: block; }
+.marker.missing { background: var(--crema) !important; }
+.marker.missing::after { content: none; }
+
+/* ---------- controles ---------- */
+.ui { position: fixed; right: calc(20px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; align-items: center; gap: 4px; padding: 6px; border-radius: 999px; background: rgba(21,15,12,.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: var(--crema); transition: opacity .4s ease; }
+.ui.hide { opacity: 0; pointer-events: none; }
+.ui button { all: unset; cursor: pointer; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; }
+.ui button:hover { background: rgba(254,232,215,.14); }
+.ui button:focus-visible { outline: 2px solid var(--crema); outline-offset: 1px; }
+.ui svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ui .count { font: 600 13px/1 var(--sans); letter-spacing: 2px; min-width: 64px; text-align: center; font-variant-numeric: tabular-nums; }
+.progress { position: fixed; left: 0; right: 0; bottom: 0; height: 3px; z-index: 19; background: rgba(254,232,215,.12); }
+.progress span { display: block; height: 100%; width: 0; background: var(--latte); transition: width .6s var(--ease); }
+.next-btn { cursor: pointer; border-radius: 50%; }
+.next-btn:hover { transform: translateX(6px); }
+.next-btn img { width: 100%; height: 100%; display: block; }
+.next-btn .cue-fallback { display: none; width: 100%; height: 100%; }
+.next-btn.nocue img { display: none; }
+.next-btn.nocue .cue-fallback { display: block; }
+
+@media (prefers-reduced-motion: reduce) {
+  .a, .w > span, .slide { transition: none !important; }
+  .leaves .sway { animation: none; }
+}
+</style>
+<style>html,body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<div class="viewport" id="viewport">
+<div class="stage" id="stage">
+
+<!-- 01 · Portada -->
+<section class="slide bg-marsala" data-name="Portada">
+  <div class="full glow"></div>
+  <div class="full shade"></div>
+  <div class="leaves" style="left:197.09px;top:-262.36px;width:884.972px;height:1022.363px"><div class="rot" style="width:885.813px;height:510.453px;transform:rotate(-120deg)"><div class="sway"><img src="assets/s1-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <div class="leaves" style="left:-248.03px;top:120px;width:738.45px;height:573.932px"><div class="rot" style="width:649.596px;height:374.332px;transform:rotate(20deg)"><div class="sway slow"><img src="assets/s1-leaves2.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <div class="img cover a" data-a="wipe-l" data-falta="hero-image" style="left:1056px;top:0;width:864px;height:1080px;--d:150"><img class="a" data-a="zoom" src="assets/hero.jpg" alt="Mockups del sitio web y el Instagram de VA Studio sobre un escritorio" onerror="this.parentElement.classList.add('missing')" style="--d:150"></div>
+  <img class="a" data-a="logo" src="assets/logo.png" alt="Logo de VA Studio" onerror="this.classList.add('gone')" style="left:492.75px;top:96px;width:70.499px;height:64px;--d:500">
+  <p class="lbl c-crema center a" data-a="fade" style="left:328px;top:180px;width:400px;--d:700">VA Studio</p>
+  <p class="nota c-crema center a" data-a="fade" style="left:328px;top:206px;width:400px;--d:800">Una nueva etapa</p>
+  <div class="rule r-crema a" data-a="line" style="left:496px;top:300px;width:64px;--d:900"></div>
+  <h1 class="c-crema" data-words style="left:120px;top:315px;width:860px;font:400 156px/.9 var(--display);letter-spacing:-3.12px;margin:0;--d:350">Una nueva<br>etapa.</h1>
+  <p class="cuerpo-g c-2m a" data-a="up" style="left:120px;top:800px;width:700px;--d:1100">Una propuesta para acompañar el crecimiento de VA Studio: marca, formación y presencia digital.</p>
+  <p class="c-crema a" data-a="fade" style="left:120px;top:953px;width:800px;font:600 26px/1.4 var(--sans);letter-spacing:6.76px;text-transform:uppercase;--d:1400">Masajes · Estética · Formación</p>
+</section>
+
+<!-- 02 · Lo que escuchamos -->
+<section class="slide bg-crema" data-name="Lo que escuchamos">
+  <div class="full grad-crema"></div>
+  <div class="leaves" style="left:839.09px;top:-503.17px;width:1140.91px;height:1088.475px"><div class="rot" style="width:1003.922px;height:578.513px;transform:rotate(140deg)"><div class="sway"><img src="assets/s2-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:96px;width:60px">01</p>
+  <div class="rule r-marsala a" data-a="line" style="left:120px;top:140px;width:56px"></div>
+  <p class="lbl c-tinta a" data-a="fade" style="left:192px;top:96px;width:760px;--d:100">Lo que escuchamos</p>
+  <p class="lbl c-2 right a" data-a="fade" style="left:1500px;top:96px;width:300px">02 / 12</p>
+  <p class="c-tinta" data-words style="left:120px;top:227px;width:1480px;font:400 96px/1.24 var(--display);letter-spacing:-.96px;--d:200">Enseñar y acompañar a otras personas en su camino es lo que más representa la identidad de VA Studio.</p>
+  <div class="rule r-tinta a" data-a="line" style="left:120px;top:820px;width:544px;--d:1300"></div>
+  <p class="cuerpo c-tinta a" data-a="up" style="left:120px;top:848px;width:504px;--d:1450">Sostener un equipo estable hoy demanda mucha energía.</p>
+  <div class="rule r-tinta a" data-a="line" style="left:688px;top:820px;width:544px;--d:1500"></div>
+  <p class="cuerpo c-tinta a" data-a="up" style="left:688px;top:848px;width:504px;--d:1650">Las redes todavía no encontraron su lugar en el día a día.</p>
+  <div class="rule r-marsala a" data-a="line" style="left:1256px;top:820px;width:544px;--d:1700"></div>
+  <p class="cuerpo c-tinta a" data-a="up" style="left:1256px;top:848px;width:504px;--d:1850">El curso de octubre ya abrió el camino de la formación.</p>
+</section>
+
+<!-- 03 · Dónde está hoy -->
+<section class="slide bg-blanco" data-name="Dónde está hoy VA Studio">
+  <div class="full grad-blanco"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:96px;width:60px">02</p>
+  <div class="rule r-marsala a" data-a="line" style="left:120px;top:140px;width:56px"></div>
+  <p class="lbl c-tinta a" data-a="fade" style="left:192px;top:96px;width:760px;--d:100">Dónde está hoy VA Studio</p>
+  <p class="lbl c-2 right a" data-a="fade" style="left:1500px;top:96px;width:300px">03 / 12</p>
+  <p class="c-tinta" data-words style="left:120px;top:210px;width:1250px;font:400 84px/1.3 var(--display);letter-spacing:-.84px;--d:200">Un negocio que funciona y que merece verse más.</p>
+  <div class="rule r-gris a" data-a="line" style="left:120px;top:600px;width:402px;--d:800"></div>
+  <p class="disp c-tinta a" data-a="up" data-count="16" style="left:120px;top:640px;width:402px;--d:900">16</p>
+  <p class="cuerpo c-2 a" data-a="fade" style="left:120px;top:800px;width:378px;--d:1100">años de oficio</p>
+  <div class="rule r-gris a" data-a="line" style="left:546px;top:600px;width:402px;--d:950"></div>
+  <p class="disp c-tinta a" data-a="up" data-count="5" style="left:546px;top:640px;width:402px;--d:1050">5</p>
+  <p class="cuerpo c-2 a" data-a="fade" style="left:546px;top:800px;width:378px;--d:1250">años con local propio</p>
+  <div class="rule r-gris a" data-a="line" style="left:972px;top:600px;width:402px;--d:1100"></div>
+  <p class="disp c-tinta a" data-a="up" data-count="1133" style="left:972px;top:640px;width:402px;--d:1200">1.133</p>
+  <p class="cuerpo c-2 a" data-a="fade" style="left:972px;top:800px;width:378px;--d:1400">seguidores en Instagram</p>
+  <div class="rule r-marsala a" data-a="line" style="left:1398px;top:600px;width:402px;--d:1250"></div>
+  <p class="disp c-marsala a" data-a="up" style="left:1398px;top:640px;width:402px;--d:1700">1</p>
+  <p class="cuerpo c-2 a" data-a="fade" style="left:1398px;top:800px;width:378px;--d:1850">reseña en Google, por ahora</p>
+  <p class="nota c-2 a" data-a="fade" style="left:120px;top:960px;width:900px;--d:2000">Instagram y Google Maps, octubre de 2026.</p>
+</section>
+
+<!-- 04 · Una sola marca -->
+<section class="slide bg-crema" data-name="Una sola marca">
+  <div class="full grad-crema"></div>
+  <div class="a" data-a="wipe-l" style="left:1020px;top:0;width:900px;height:1080px;--d:900">
+    <div style="position:absolute;inset:0;background:var(--marsala)"></div>
+    <div style="position:absolute;inset:0;background:radial-gradient(750px 900px at 252px 237.6px, rgba(255,255,255,.16), rgba(255,255,255,0))"></div>
+    <div class="shade" style="position:absolute;inset:0"></div>
+  </div>
+  <div class="leaves a" data-a="fade" style="left:1203.1px;top:49.54px;width:939.846px;height:730.459px;--d:1300"><div class="rot" style="width:826.759px;height:476.422px;transform:rotate(-160deg)"><div class="sway"><img src="assets/s4-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:96px;width:60px">03</p>
+  <div class="rule r-marsala a" data-a="line" style="left:120px;top:140px;width:56px"></div>
+  <p class="lbl c-tinta a" data-a="fade" style="left:192px;top:96px;width:760px;--d:100">Una sola marca</p>
+  <p class="lbl c-crema right a" data-a="fade" style="left:1500px;top:96px;width:300px;--d:1300">04 / 12</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:120px;top:240px;width:760px;--d:150">Hoy la marca convive con distintos nombres:</p>
+  <p class="t3 c-2 a" data-a="up" style="left:120px;top:320px;width:800px;text-decoration:underline;--d:300">VA Estética y Cosmiatría</p>
+  <p class="t3 c-2 a" data-a="up" style="left:120px;top:416px;width:800px;text-decoration:underline;--d:400">Vanesa Álvarez</p>
+  <p class="t3 c-2 a" data-a="up" style="left:120px;top:512px;width:800px;text-decoration:underline;--d:500">Centro de Estética V.A.</p>
+  <p class="t3 c-2 a" data-a="up" style="left:120px;top:608px;width:800px;text-decoration:underline;--d:600">otrapiel.estetica</p>
+  <p class="t3 c-2 a" data-a="up" style="left:120px;top:704px;width:800px;text-decoration:underline;--d:700">Va.studio</p>
+  <img class="a" data-a="logo" src="assets/logo.png" alt="Logo de VA Studio" onerror="this.classList.add('gone')" style="left:1120px;top:250px;width:154.217px;height:140px;--d:1500">
+  <p class="disp c-crema" data-words style="left:1120px;top:440px;width:700px;--d:1700">VA Studio.</p>
+  <p class="cuerpo-g c-2m a" data-a="up" style="left:1120px;top:730px;width:640px;--d:2000">Un nombre, un teléfono y una imagen, con tu historia como sello.</p>
+  <p class="lbl c-crema a" data-a="fade" style="left:1120px;top:970px;width:700px;--d:2300">Un nombre · Un teléfono · Una imagen</p>
+</section>
+
+<!-- 05 · El modelo -->
+<section class="slide bg-crema" data-name="El modelo">
+  <div class="full grad-crema"></div>
+  <div class="leaves" style="left:-260px;top:486.53px;width:872.46px;height:832.363px"><div class="rot" style="width:767.705px;height:442.392px;transform:rotate(-40deg)"><div class="sway"><img src="assets/s5-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:96px;width:60px">04</p>
+  <div class="rule r-marsala a" data-a="line" style="left:120px;top:140px;width:56px"></div>
+  <p class="lbl c-tinta a" data-a="fade" style="left:192px;top:96px;width:760px;--d:100">El modelo</p>
+  <p class="lbl c-2 right a" data-a="fade" style="left:1500px;top:96px;width:300px">05 / 12</p>
+  <p class="t1 c-tinta" data-words style="left:120px;top:210px;width:1300px;--d:200">Tres líneas, una marca.</p>
+
+  <div class="rule r-tinta a" data-a="line" style="left:120px;top:450px;width:544px;--d:600"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:484px;width:200px;--d:750">01</p>
+  <p class="t2 c-tinta a" data-a="up" style="left:120px;top:530px;width:520px;--d:800">Masajes.</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:120px;top:690px;width:496px;--d:950">La especialidad que da origen a todo y sostiene el prestigio del espacio.</p>
+  <p class="lbl c-tinta a" data-a="fade" style="left:120px;top:870px;width:544px;--d:1100">Servicios propios</p>
+
+  <div class="rule r-tinta a" data-a="line" style="left:688px;top:450px;width:544px;--d:800"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:688px;top:484px;width:200px;--d:950">02</p>
+  <p class="t2 c-tinta a" data-a="up" style="left:688px;top:530px;width:520px;--d:1000">Estética y cosmiatría.</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:688px;top:690px;width:496px;--d:1150">Profesionales independientes que alquilan un box. La oferta puede cambiar; la marca permanece.</p>
+  <p class="lbl c-tinta a" data-a="fade" style="left:688px;top:870px;width:544px;--d:1300">Alquiler de espacio</p>
+
+  <div class="rule r-marsala a" data-a="line" style="left:1256px;top:450px;width:544px;height:3px;--d:1000"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1256px;top:484px;width:200px;--d:1150">03</p>
+  <p class="t2 c-tinta a" data-a="up" style="left:1256px;top:530px;width:520px;--d:1200">Formación.</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:1256px;top:690px;width:496px;--d:1350">Cursos en grupos chicos, con técnica y herramientas para trabajar de manera independiente.</p>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1256px;top:870px;width:544px;--d:1500">Cursos y talleres</p>
+
+  <p class="nota c-2 a" data-a="fade" style="left:120px;top:970px;width:1200px;--d:1700">Con una base común: Google Maps · WhatsApp Business · Sitio web</p>
+</section>
+
+<!-- 06 · El camino de la alumna -->
+<section class="slide bg-marsala" data-name="El camino de la alumna">
+  <div class="full glow"></div>
+  <div class="full shade"></div>
+  <div class="leaves" style="left:588.54px;top:-551.34px;width:1111.464px;height:1222.079px"><div class="rot" style="width:1062.976px;height:612.543px;transform:rotate(125deg)"><div class="sway"><img src="assets/s6-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <div class="leaves" style="left:-200px;top:693.53px;width:814.72px;height:740.976px"><div class="rot" style="width:708.651px;height:408.362px;transform:rotate(-35deg)"><div class="sway slow"><img src="assets/s6-leaves2.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:120px;top:96px;width:60px">05</p>
+  <div class="rule r-crema a" data-a="line" style="left:120px;top:140px;width:56px"></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:192px;top:96px;width:760px;--d:100">El camino de la alumna</p>
+  <p class="lbl c-crema right a" data-a="fade" style="left:1500px;top:96px;width:300px">06 / 12</p>
+  <p class="t1 c-crema" data-words style="left:120px;top:210px;width:1300px;--d:200">Un camino para cada alumna.</p>
+
+  <div class="rule r-2m a" data-a="line" style="left:120px;top:560px;width:1680px;--d:700;transition-duration:1s,2.6s,1s;transition-timing-function:linear"></div>
+
+  <div class="marker a" data-a="pop" style="left:120px;top:552px;width:16px;height:16px;--d:700"><img src="assets/marker.svg" alt="" onerror="this.parentElement.classList.add('missing')"></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:120px;top:500px;width:120px;--d:750">01</p>
+  <p class="t3 c-crema a" data-a="up" style="left:120px;top:610px;width:300px;--d:800">Descubre</p>
+  <p class="cuerpo c-2m a" data-a="up" style="left:120px;top:676px;width:290px;--d:900">Conoce VA Studio por redes o por recomendación.</p>
+
+  <div class="marker a" data-a="pop" style="left:460px;top:552px;width:16px;height:16px;--d:1230"><img src="assets/marker.svg" alt="" onerror="this.parentElement.classList.add('missing')"></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:460px;top:500px;width:120px;--d:1280">02</p>
+  <p class="t3 c-crema a" data-a="up" style="left:460px;top:610px;width:300px;--d:1330">Consulta</p>
+  <p class="cuerpo c-2m a" data-a="up" style="left:460px;top:676px;width:290px;--d:1430">Escribe por WhatsApp y recibe toda la información.</p>
+
+  <div class="marker a" data-a="pop" style="left:800px;top:552px;width:16px;height:16px;--d:1760"><img src="assets/marker.svg" alt="" onerror="this.parentElement.classList.add('missing')"></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:800px;top:500px;width:120px;--d:1810">03</p>
+  <p class="t3 c-crema a" data-a="up" style="left:800px;top:610px;width:300px;--d:1860">Se forma</p>
+  <p class="cuerpo c-2m a" data-a="up" style="left:800px;top:676px;width:290px;--d:1960">Aprende la técnica en grupos chicos.</p>
+
+  <div class="marker a" data-a="pop" style="left:1140px;top:552px;width:16px;height:16px;--d:2290"><img src="assets/marker.svg" alt="" onerror="this.parentElement.classList.add('missing')"></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:1140px;top:500px;width:120px;--d:2340">04</p>
+  <p class="t3 c-crema a" data-a="up" style="left:1140px;top:610px;width:300px;--d:2390">Se independiza</p>
+  <p class="cuerpo c-2m a" data-a="up" style="left:1140px;top:706px;width:290px;--d:2490">Empieza a trabajar por su cuenta, incluso desde un box del espacio.</p>
+
+  <div class="marker a" data-a="pop" style="left:1477px;top:549px;width:22px;height:22px;--d:2820"><img src="assets/marker5.svg" alt="" onerror="this.parentElement.classList.add('missing')"></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:1480px;top:500px;width:120px;--d:2870">05</p>
+  <p class="t3 c-crema a" data-a="up" style="left:1480px;top:610px;width:300px;--d:2920">Recomienda</p>
+  <p class="cuerpo c-2m a" data-a="up" style="left:1480px;top:676px;width:290px;--d:3020">Comparte su experiencia y acerca nuevas alumnas.</p>
+
+  <p class="t3 c-crema a" data-a="up" style="left:120px;top:940px;width:1200px;--d:3500">Cada recomendación vuelve a empezar el camino.</p>
+</section>
+
+<!-- 07 · Por qué la formación -->
+<section class="slide bg-crema" data-name="Por qué la formación">
+  <div class="full grad-crema"></div>
+  <div class="leaves" style="left:1182.11px;top:-313.65px;width:817.891px;height:707.977px"><div class="rot" style="width:708.651px;height:408.362px;transform:rotate(150deg)"><div class="sway"><img src="assets/s7-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <div class="img cover a" data-a="wipe-r" data-falta="class-image" style="left:0;top:0;width:768px;height:1080px"><img class="a" data-a="zoom" src="assets/class.jpg" alt="Alumnas del curso de masajes con sus certificados" onerror="this.parentElement.classList.add('missing')"></div>
+  <p class="nota c-2 a" data-a="fade" style="left:32px;top:1024px;width:704px;--d:1000">Foto · una clase del curso de masajes</p>
+  <p class="lbl c-marsala a" data-a="fade" style="left:888px;top:96px;width:60px;--d:300">06</p>
+  <div class="rule r-marsala a" data-a="line" style="left:888px;top:140px;width:56px;--d:300"></div>
+  <p class="lbl c-tinta a" data-a="fade" style="left:960px;top:96px;width:760px;--d:400">Por qué la formación</p>
+  <p class="lbl c-2 right a" data-a="fade" style="left:1500px;top:96px;width:300px;--d:300">07 / 12</p>
+  <p class="t1 c-tinta" data-words style="left:888px;top:190px;width:912px;--d:450">La formación, un motor de crecimiento.</p>
+  <p class="lbl c-marsala a" data-a="fade" style="left:888px;top:556px;width:60px;--d:1000">01</p>
+  <p class="cuerpo c-tinta a" data-a="up" style="left:960px;top:550px;width:840px;--d:1000">Cada vez más personas buscan un oficio para trabajar por su cuenta: los puestos no asalariados crecieron 3,9% en un año.</p>
+  <p class="lbl c-marsala a" data-a="fade" style="left:888px;top:664px;width:60px;--d:1180">02</p>
+  <p class="cuerpo c-tinta a" data-a="up" style="left:960px;top:658px;width:840px;--d:1180">En Canning ya hay demanda: existen cursos de pestañas y cejas con alumnas que los recomiendan.</p>
+  <p class="lbl c-marsala a" data-a="fade" style="left:888px;top:772px;width:60px;--d:1360">03</p>
+  <p class="cuerpo c-tinta a" data-a="up" style="left:960px;top:766px;width:840px;--d:1360">Las academias de la zona están en Monte Grande. No encontramos formación en masajes en Canning.</p>
+  <p class="lbl c-marsala a" data-a="fade" style="left:888px;top:880px;width:60px;--d:1540">04</p>
+  <p class="cuerpo c-tinta a" data-a="up" style="left:960px;top:874px;width:840px;--d:1540">El diferencial de VA Studio es el camino completo: aprender el oficio y también cómo trabajar de forma independiente.</p>
+  <p class="nota c-2 a" data-a="fade" style="left:888px;top:1010px;width:912px;--d:1800">Fuentes: INDEC, 2.º trimestre de 2026, vía El Cronista; Google Maps, octubre de 2026.</p>
+</section>
+
+<!-- 08 · Identidad -->
+<section class="slide bg-blanco" data-name="Identidad">
+  <div class="full grad-blanco"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:96px;width:60px">07</p>
+  <div class="rule r-marsala a" data-a="line" style="left:120px;top:140px;width:56px"></div>
+  <p class="lbl c-tinta a" data-a="fade" style="left:192px;top:96px;width:760px;--d:100">Identidad</p>
+  <p class="lbl c-2 right a" data-a="fade" style="left:1500px;top:96px;width:300px">08 / 12</p>
+  <div class="a" data-a="wipe-r" style="left:120px;top:200px;width:544px;height:560px;--d:150">
+    <div style="position:absolute;inset:0;background:var(--marsala)"></div>
+    <div style="position:absolute;inset:0;background:radial-gradient(453.33px 466.67px at 152.32px 123.2px, rgba(255,255,255,.16), rgba(255,255,255,0))"></div>
+    <div class="shade" style="position:absolute;inset:0"></div>
+  </div>
+  <img class="a" data-a="logo" src="assets/logo.png" alt="Logo de VA Studio" onerror="this.classList.add('gone')" style="left:226.77px;top:330px;width:330.466px;height:300px;--d:700">
+  <p class="lbl c-marsala a" data-a="fade" style="left:688px;top:200px;width:300px;--d:400">Paleta</p>
+  <div class="a" data-a="pop" style="left:688px;top:244px;width:156px;height:110px;border-radius:4px;background:var(--marsala);--d:500"></div>
+  <p class="nota c-2 a" data-a="fade" style="left:688px;top:364px;width:156px;--d:600">#955242</p>
+  <div class="a" data-a="pop" style="left:868px;top:244px;width:156px;height:110px;border-radius:4px;background:var(--crema);--d:580"></div>
+  <p class="nota c-2 a" data-a="fade" style="left:868px;top:364px;width:156px;--d:680">#FEE8D7</p>
+  <div class="a" data-a="pop" style="left:1048px;top:244px;width:156px;height:110px;border-radius:4px;background:var(--latte);--d:660"></div>
+  <p class="nota c-2 a" data-a="fade" style="left:1048px;top:364px;width:156px;--d:760">#C89D8D</p>
+  <div class="a" data-a="pop" style="left:688px;top:414px;width:156px;height:110px;border-radius:4px;background:var(--gris-calido);--d:740"></div>
+  <p class="nota c-2 a" data-a="fade" style="left:688px;top:534px;width:156px;--d:840">#E9E2DD</p>
+  <div class="a" data-a="pop" style="left:868px;top:414px;width:156px;height:110px;border-radius:4px;background:var(--tinta);--d:820"></div>
+  <p class="nota c-2 a" data-a="fade" style="left:868px;top:534px;width:156px;--d:920">#150F0C</p>
+  <div class="a" data-a="pop" style="left:1048px;top:414px;width:156px;height:110px;border-radius:4px;background:var(--fondo);border:1px solid var(--gris-calido);box-sizing:border-box;--d:900"></div>
+  <p class="nota c-2 a" data-a="fade" style="left:1048px;top:534px;width:156px;--d:1000">#FFFFFF</p>
+  <p class="lbl c-marsala a" data-a="fade" style="left:688px;top:600px;width:300px;--d:1000">Tipografía</p>
+  <p class="disp c-tinta a" data-a="up" style="left:688px;top:630px;width:520px;--d:1100">Aa Aa</p>
+  <p class="nota c-2 a" data-a="fade" style="left:688px;top:790px;width:520px;--d:1250">TAN - Angleton · Source Sans 3</p>
+  <div class="img cover a" data-a="wipe-l" data-falta="mood-image" style="left:1256px;top:200px;width:544px;height:560px;--d:350"><img class="a" data-a="zoom" src="assets/mood.jpg" alt="Celular con la ficha de VA Studio en Google Maps sobre una piedra clara" onerror="this.parentElement.classList.add('missing')" style="--d:350"></div>
+  <p class="t2 c-tinta" data-words style="left:120px;top:860px;width:1300px;--d:1300">Calma, orgánica, cálida y humana.</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:120px;top:940px;width:1300px;--d:1700">Blanco y crema como base, la terracota como acento y fotos reales con luz natural.</p>
+</section>
+
+<!-- 09 · Presencia online -->
+<section class="slide bg-crema" data-name="Presencia online">
+  <div class="full grad-crema"></div>
+  <div class="leaves" style="left:969.49px;top:119.71px;width:1025.062px;height:700.286px"><div class="rot" style="width:944.868px;height:544.483px;transform:rotate(-170deg)"><div class="sway"><img src="assets/s9-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:96px;width:60px">08</p>
+  <div class="rule r-marsala a" data-a="line" style="left:120px;top:140px;width:56px"></div>
+  <p class="lbl c-tinta a" data-a="fade" style="left:192px;top:96px;width:760px;--d:100">Presencia online</p>
+  <p class="lbl c-2 right a" data-a="fade" style="left:1500px;top:96px;width:300px">09 / 12</p>
+  <p class="t1 c-tinta" data-words style="left:120px;top:210px;width:1300px;--d:200">Tres canales, una misma información.</p>
+
+  <div class="img a" data-a="up" data-falta="mockup-google" style="left:120px;top:400px;width:220px;height:440px;--d:700"><img src="assets/mock-google.png" alt="Ficha de VA Studio en Google Maps" onerror="this.parentElement.classList.add('missing')" style="inset:0;width:100%;height:100%"></div>
+  <p class="t3 c-tinta a" data-a="up" style="left:372px;top:540px;width:284px;--d:850">Google Maps</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:372px;top:660px;width:284px;--d:950">Ficha completa, fotos reales y reseñas.</p>
+
+  <div class="img a" data-a="up" data-falta="mockup-whatsapp" style="left:688px;top:400px;width:220px;height:440px;--d:950"><img src="assets/mock-whatsapp.png" alt="Chat de WhatsApp Business de VA Studio" onerror="this.parentElement.classList.add('missing')" style="inset:0;width:100%;height:100%"></div>
+  <p class="t3 c-tinta a" data-a="up" style="left:940px;top:540px;width:284px;--d:1100">WhatsApp Business</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:940px;top:660px;width:284px;--d:1200">Catálogo, respuestas rápidas y etiquetas.</p>
+
+  <div class="img a" data-a="up" data-falta="mockup-sitio" style="left:1263px;top:401px;width:210px;height:438px;--d:1200"><img src="assets/mock-sitio.png" alt="Sitio web de VA Studio en un celular" onerror="this.parentElement.classList.add('missing')" style="inset:0;width:100%;height:100%"></div>
+  <p class="t3 c-tinta a" data-a="up" style="left:1508px;top:540px;width:284px;--d:1350">Sitio web</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:1508px;top:660px;width:284px;--d:1450">Una página simple que lleva todo a WhatsApp.</p>
+</section>
+
+<!-- 10 · Plan de trabajo -->
+<section class="slide bg-blanco" data-name="Plan de trabajo">
+  <div class="full grad-blanco"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:96px;width:60px">09</p>
+  <div class="rule r-marsala a" data-a="line" style="left:120px;top:140px;width:56px"></div>
+  <p class="lbl c-tinta a" data-a="fade" style="left:192px;top:96px;width:760px;--d:100">Plan de trabajo</p>
+  <p class="lbl c-2 right a" data-a="fade" style="left:1500px;top:96px;width:300px">10 / 12</p>
+  <p class="t1 c-tinta" data-words style="left:120px;top:210px;width:1300px;--d:200">Ocho semanas, cuatro etapas.</p>
+
+  <div class="rule r-tinta a" data-a="line" style="left:120px;top:480px;width:402px;--d:600"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:120px;top:512px;width:402px;--d:700">Semana 1</p>
+  <p class="t2 c-tinta a" data-a="up" style="left:120px;top:556px;width:353px;--d:750">Descubri-<br>miento.</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:120px;top:710px;width:370px;--d:850">Una charla para definir nombre, teléfono y servicios.</p>
+
+  <div class="rule r-tinta a" data-a="line" style="left:546px;top:480px;width:402px;--d:800"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:546px;top:512px;width:402px;--d:900">Semanas 2 y 3</p>
+  <p class="t2 c-tinta a" data-a="up" style="left:546px;top:556px;width:386px;--d:950">Base local.</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:546px;top:710px;width:370px;--d:1050">Google Maps, WhatsApp Business y primeras reseñas.</p>
+
+  <div class="rule r-tinta a" data-a="line" style="left:972px;top:480px;width:402px;--d:1000"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:972px;top:512px;width:402px;--d:1100">Semanas 4 y 5</p>
+  <p class="t2 c-tinta a" data-a="up" style="left:972px;top:556px;width:386px;--d:1150">Sitio y contenido.</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:972px;top:710px;width:370px;--d:1250">Fotos reales, sitio de una página y plantillas.</p>
+
+  <div class="rule r-marsala a" data-a="line" style="left:1398px;top:480px;width:402px;height:3px;--d:1200"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1398px;top:512px;width:402px;--d:1300">Semanas 6 a 8</p>
+  <p class="t2 c-tinta a" data-a="up" style="left:1398px;top:556px;width:386px;--d:1350">Próximo curso.</p>
+  <p class="cuerpo c-2 a" data-a="up" style="left:1398px;top:710px;width:370px;--d:1450">Ficha del programa, inscripción y difusión.</p>
+
+  <p class="t3 c-marsala a" data-a="up" style="left:120px;top:930px;width:1600px;--d:1800">El objetivo: que la próxima edición del curso se complete con lista de espera.</p>
+</section>
+
+<!-- 11 · Próximos pasos -->
+<section class="slide bg-crema" data-name="Próximos pasos">
+  <div class="full grad-crema"></div>
+  <div class="a" data-a="wipe-r" style="left:0;top:0;width:820px;height:1080px">
+    <div style="position:absolute;inset:0;background:var(--marsala)"></div>
+    <div style="position:absolute;inset:0;background:radial-gradient(683.33px 900px at 229.6px 237.6px, rgba(255,255,255,.16), rgba(255,255,255,0))"></div>
+    <div class="shade" style="position:absolute;inset:0"></div>
+  </div>
+  <div class="leaves" style="left:453.09px;top:236.66px;width:507.619px;height:803.341px"><div class="rot" style="width:767.705px;height:442.392px;transform:rotate(-95deg)"><div class="sway"><img src="assets/s11-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:120px;top:96px;width:60px;--d:300">10</p>
+  <div class="rule r-crema a" data-a="line" style="left:120px;top:140px;width:56px;--d:300"></div>
+  <p class="lbl c-crema a" data-a="fade" style="left:192px;top:96px;width:760px;--d:400">Próximos pasos</p>
+  <p class="lbl c-2 right a" data-a="fade" style="left:1500px;top:96px;width:300px">11 / 12</p>
+  <p class="c-crema" data-words style="left:120px;top:300px;width:391px;font:400 106px/.94 var(--display);letter-spacing:-1.06px;--d:450">Para empezar.</p>
+  <p class="cuerpo c-2m a" data-a="up" style="left:120px;top:640px;width:560px;--d:800">La mayor parte se resuelve en la primera semana. Después, alcanza con un audio corto por semana.</p>
+  <div class="next-btn a" data-a="fade" role="button" tabindex="0" aria-label="Siguiente diapositiva" data-falta="" style="left:120px;top:880px;width:76px;height:76px;--d:1000;transition:opacity 1s var(--ease),transform .4s var(--ease)"><img src="assets/next-cue.svg" alt="" onerror="this.parentElement.classList.add('nocue')"><svg class="cue-fallback" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="38" r="37" fill="none" stroke="#fee8d7" stroke-width="1.5"/><path d="M27 38h22M42 31l7 7-7 7" fill="none" stroke="#fee8d7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+  <div class="rule r-tinta a" data-a="line" style="left:1114px;top:220px;width:686px;--d:600"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1114px;top:248px;width:60px;--d:700">01</p>
+  <p class="cuerpo-g c-tinta a" data-a="up" style="left:1186px;top:242px;width:614px;--d:700">Definir el nombre y el teléfono principales</p>
+  <div class="rule r-tinta a" data-a="line" style="left:1114px;top:340px;width:686px;--d:750"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1114px;top:368px;width:60px;--d:850">02</p>
+  <p class="cuerpo-g c-tinta a" data-a="up" style="left:1186px;top:362px;width:614px;--d:850">Configurar Google Maps, Instagram y WhatsApp</p>
+  <div class="rule r-tinta a" data-a="line" style="left:1114px;top:460px;width:686px;--d:900"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1114px;top:488px;width:60px;--d:1000">03</p>
+  <p class="cuerpo-g c-tinta a" data-a="up" style="left:1186px;top:482px;width:614px;--d:1000">Reunir la lista de servicios y precios</p>
+  <div class="rule r-tinta a" data-a="line" style="left:1114px;top:580px;width:686px;--d:1050"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1114px;top:608px;width:60px;--d:1150">04</p>
+  <p class="cuerpo-g c-tinta a" data-a="up" style="left:1186px;top:602px;width:614px;--d:1150">Sumar fotos del espacio, del trabajo y tuyas</p>
+  <div class="rule r-tinta a" data-a="line" style="left:1114px;top:700px;width:686px;--d:1200"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1114px;top:728px;width:60px;--d:1300">05</p>
+  <p class="cuerpo-g c-tinta a" data-a="up" style="left:1186px;top:722px;width:614px;--d:1300">Contactar a alumnas y clientas para testimonios</p>
+  <div class="rule r-tinta a" data-a="line" style="left:1114px;top:820px;width:686px;--d:1350"></div>
+  <p class="lbl c-marsala a" data-a="fade" style="left:1114px;top:848px;width:60px;--d:1450">06</p>
+  <p class="cuerpo-g c-tinta a" data-a="up" style="left:1186px;top:842px;width:614px;--d:1450">Elegir la fecha del próximo curso</p>
+</section>
+
+<!-- 12 · Cierre -->
+<section class="slide bg-marsala" data-name="Cierre">
+  <div class="full glow"></div>
+  <div class="full shade"></div>
+  <div class="leaves" style="left:533.47px;top:-595.61px;width:1216.531px;height:1275.135px"><div class="rot" style="width:1122.03px;height:646.574px;transform:rotate(130deg)"><div class="sway"><img src="assets/s12-leaves1.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <div class="leaves" style="left:-260px;top:677.09px;width:1022.363px;height:884.972px"><div class="rot" style="width:885.813px;height:510.453px;transform:rotate(-30deg)"><div class="sway slow"><img src="assets/s12-leaves2.svg" alt="" onerror="this.classList.add('gone')"></div></div></div>
+  <img class="a" data-a="logo" src="assets/logo.png" alt="Logo de VA Studio" onerror="this.classList.add('gone')" style="left:794.77px;top:170px;width:330.466px;height:300px;--d:200">
+  <h2 class="c-crema center" data-words style="left:119px;top:525px;width:1680px;margin:0;font:400 136px/1.14 var(--display);letter-spacing:-1.36px;--d:700">Manos que cuidan,<br>manos que enseñan.</h2>
+  <p class="lbl c-crema center a" data-a="fade" style="left:120px;top:960px;width:1680px;--d:1600">VA Studio · Canning · Una nueva etapa</p>
+</section>
+
+</div>
+</div>
+
+<div class="progress" aria-hidden="true"><span id="bar"></span></div>
+<nav class="ui" id="ui" aria-label="Controles de la presentación">
+  <button id="prev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <span class="count" id="count" aria-live="polite">1 / 12</span>
+  <button id="next" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  <button id="fs" aria-label="Pantalla completa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+</nav>
+
+<script>
+(function () {
+  document.documentElement.classList.add('js');
+  var stage = document.getElementById('stage');
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var bar = document.getElementById('bar');
+  var count = document.getElementById('count');
+  var ui = document.getElementById('ui');
+  var cur = -1, outTimer = null;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Divide los títulos en palabras para que suban una por una */
+  document.querySelectorAll('[data-words]').forEach(function (el) {
+    var i = 0, out = '';
+    el.innerHTML.split(/(<br\s*\/?>)/i).forEach(function (part) {
+      if (/^<br/i.test(part)) { out += '<br>'; return; }
+      part.split(/(\s+)/).forEach(function (tok) {
+        if (!tok) return;
+        if (/^\s+$/.test(tok)) { out += ' '; return; }
+        out += '<span class="w"><span style="--i:' + (i++) + '">' + tok + '</span></span>';
+      });
+    });
+    el.innerHTML = out;
+  });
+
+  /* Escala el escenario de 1920×1080 a la ventana */
+  function fit() {
+    var fs = !!document.fullscreenElement;
+    var pad = fs ? 0 : (window.innerWidth < 700 ? 16 : 0);
+    var s = Math.min((window.innerWidth - pad * 2) / 1920, window.innerHeight / 1080);
+    stage.style.transform = 'translate(-50%, -50%) scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  document.addEventListener('fullscreenchange', fit);
+  fit();
+
+  /* Contadores de la diapositiva 3 */
+  function countUp(slide) {
+    slide.querySelectorAll('[data-count]').forEach(function (el) {
+      var target = +el.getAttribute('data-count');
+      var fmt = function (n) { return n.toLocaleString('es-AR'); };
+      if (reduce) { el.textContent = fmt(target); return; }
+      var d = parseFloat(getComputedStyle(el).getPropertyValue('--d')) || 0;
+      var start = null, dur = 1600;
+      el.textContent = fmt(0);
+      setTimeout(function () {
+        function step(t) {
+          if (!start) start = t;
+          var p = Math.min((t - start) / dur, 1);
+          var e = 1 - Math.pow(1 - p, 3);
+          el.textContent = fmt(Math.round(target * e));
+          if (p < 1 && slide.classList.contains('on')) requestAnimationFrame(step);
+          else el.textContent = fmt(target);
+        }
+        requestAnimationFrame(step);
+      }, d + 200);
+    });
+  }
+
+  function go(n) {
+    n = Math.max(0, Math.min(slides.length - 1, n));
+    if (n === cur) return;
+    var prev = slides[cur];
+    if (prev) {
+      prev.classList.remove('on');
+      prev.classList.add('out');
+      clearTimeout(outTimer);
+      outTimer = setTimeout(function () { slides.forEach(function (s) { if (!s.classList.contains('on')) s.classList.remove('out'); }); }, 750);
+    }
+    cur = n;
+    var s = slides[n];
+    s.classList.remove('out');
+    void s.offsetWidth; /* reinicia las transiciones */
+    s.classList.add('on');
+    countUp(s);
+    bar.style.width = ((n + 1) / slides.length * 100) + '%';
+    count.textContent = (n + 1) + ' / ' + slides.length;
+    try { history.replaceState(null, '', '#' + (n + 1)); } catch (e) {}
+  }
+
+  /* Teclado (incluye presentadores / clickers) */
+  document.addEventListener('keydown', function (e) {
+    var k = e.key;
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].indexOf(k) > -1) { e.preventDefault(); go(cur + 1); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].indexOf(k) > -1) { e.preventDefault(); go(cur - 1); }
+    else if (k === 'Home') go(0);
+    else if (k === 'End') go(slides.length - 1);
+    else if (k === 'f' || k === 'F') toggleFs();
+    else if (/^[1-9]$/.test(k)) go(+k - 1);
+    wake();
+  });
+
+  /* Clic: mitad derecha avanza, mitad izquierda retrocede */
+  document.getElementById('viewport').addEventListener('click', function (e) {
+    if (e.target.closest('.next-btn')) { go(cur + 1); return; }
+    go(e.clientX > window.innerWidth / 2 ? cur + 1 : cur - 1);
+  });
+  document.querySelectorAll('.next-btn').forEach(function (b) {
+    b.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.stopPropagation(); go(cur + 1); } });
+  });
+
+  /* Gestos táctiles */
+  var tx = null;
+  document.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', function (e) {
+    if (tx === null) return;
+    var dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) { go(dx < 0 ? cur + 1 : cur - 1); }
+    tx = null;
+  }, { passive: true });
+
+  /* Controles */
+  document.getElementById('prev').addEventListener('click', function (e) { e.stopPropagation(); go(cur - 1); });
+  document.getElementById('next').addEventListener('click', function (e) { e.stopPropagation(); go(cur + 1); });
+  document.getElementById('fs').addEventListener('click', function (e) { e.stopPropagation(); toggleFs(); });
+  function toggleFs() {
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(function () {});
+    } catch (e) {}
+  }
+  var hideT = null;
+  function wake() {
+    ui.classList.remove('hide');
+    clearTimeout(hideT);
+    hideT = setTimeout(function () { ui.classList.add('hide'); }, 2500);
+  }
+  document.addEventListener('mousemove', wake);
+  wake();
+
+  var start = parseInt((location.hash || '').replace('#', ''), 10);
+  go(start >= 1 && start <= slides.length ? start - 1 : 0);
+})();
+</script>
+</body>
+</html>
