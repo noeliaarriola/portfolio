@@ -909,6 +909,10 @@ html, body {
   to   { transform: translateY(-50%); }
 }
 
+/* While a case-study modal is open the walls are hidden behind it anyway;
+   removing them frees their animated GPU layers for the modal's images. */
+.modal-open .project-wall { display: none; }
+
 /* outline (not box-shadow) so the ring is drawn over the thumbnail too */
 .project-row:focus-visible {
   outline: 2px solid var(--fg);
@@ -1415,6 +1419,15 @@ html, body {
 /* Doc: natural ratio but displayed narrower, so 1x exports stay sharp */
 .modal-media--doc .modal-media-slot { aspect-ratio: auto; max-width: 720px; }
 .modal-media--doc .modal-media-slot img { height: auto; object-fit: contain; }
+
+/* Devices: a desktop screen and phone screens in one row at the same height.
+   Each slot sets --ar (its width / height) inline and takes a share of the row
+   in that proportion, which is what makes the heights match. */
+.modal-media--devices .modal-media-slot {
+  flex: var(--ar, 1) 1 0px;
+  aspect-ratio: var(--ar, 1);
+  min-width: 0;
+}
 
 /* Key phrases inside case-study paragraphs */
 .modal-content-text strong {
@@ -2360,6 +2373,10 @@ html, body {
   .modal-media--doc .modal-media-slot { max-width: 100%; }
   .modal-media--portrait { gap: 10px; }
   .modal-media--portrait .modal-media-slot { max-width: none; }
+  /* desktop screen on its own row, phone screens side by side below it */
+  .modal-media--devices { flex-wrap: wrap; gap: 10px; }
+  .modal-media--devices .modal-media-slot:first-child { flex: 1 1 100%; }
+  .modal-media--devices .modal-media-slot:not(:first-child) { flex: 1 1 0px; }
   .browser-frame-iframe { height: 420px; }
   .browser-frame-viewport { height: 380px; }
   .modal-content-text p { font-size: 1rem; }

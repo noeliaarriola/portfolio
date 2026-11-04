@@ -140,8 +140,12 @@ function build(s) {
           </div>
         </div>
 
-        <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/powersis-hero.jpg" alt="Powersis — homepage hero: Engenharia Elétrica" /></div>
+        {/* Responsive experience: the same site on desktop and on a phone, in one
+            row at one height. --ar is each screen's width / height. */}
+        <figure className="modal-media modal-media--devices">
+          <div className="modal-media-slot" style={{ '--ar': 1600 / 911 }}><img src="/media/powersis-hero.jpg" loading="lazy" decoding="async" alt="Powersis — homepage hero: Engenharia Elétrica" /></div>
+          <div className="modal-media-slot" style={{ '--ar': 9 / 16 }}><img src="/media/powersis-mobile-hero.jpg" loading="lazy" decoding="async" alt="Powersis on mobile — hero with the 24h emergency bar and the 'Solicitar orçamento' button" loading="lazy" /></div>
+          <div className="modal-media-slot" style={{ '--ar': 9 / 16 }}><img src="/media/powersis-mobile-sobre.jpg" loading="lazy" decoding="async" alt="Powersis on mobile — '+12 years in the market', CREA registration, services and the WhatsApp contact button" loading="lazy" /></div>
         </figure>
       </div>
     ),
@@ -154,7 +158,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/powersis-servicos.jpg" alt="Powersis — 'Nossos Serviços' section with six service cards" /></div>
+          <div className="modal-media-slot"><img src="/media/powersis-servicos.jpg" loading="lazy" decoding="async" alt="Powersis — 'Nossos Serviços' section with six service cards" /></div>
         </figure>
 
         <div className="modal-subsection">
@@ -166,7 +170,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/powersis-sobre.jpg" alt="Powersis — office, '+12 years in the market' and CREA registration" /></div>
+          <div className="modal-media-slot"><img src="/media/powersis-sobre.jpg" loading="lazy" decoding="async" alt="Powersis — office, '+12 years in the market' and CREA registration" /></div>
         </figure>
 
         <div className="modal-subsection">
@@ -180,6 +184,27 @@ function build(s) {
       <div className="modal-content-text">
         <P text={s.outcome.p1} />
         <P text={s.outcome.p2} />
+
+        {/* The whole homepage in one scrollable window (optimized capture of the
+            live site): hero → credentials → services → quote form → clients →
+            the four locations in the footer. */}
+        <div className="browser-frame">
+          <div className="browser-frame-bar">
+            <div className="browser-frame-dots"><span /><span /><span /></div>
+            <span className="browser-frame-url">powersis.com.br</span>
+            <a className="browser-frame-live" href="https://www.powersis.com.br/" target="_blank" rel="noopener noreferrer">Live ↗</a>
+          </div>
+          <div className="browser-frame-viewport" tabIndex={0} role="region" aria-label="Powersis — full homepage, scrollable">
+            <img
+              src="/media/powersis-fullpage.jpg"
+              alt="Powersis — full homepage: hero, credentials, six services, quote request form, client logos and footer with four locations"
+              width="1600"
+              height="4433"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </div>
 
         <h4 className="modal-list-title">{s.outcome.resultsTitle}</h4>
         {Results(s.outcome.results, s.outcome.resultsHighlight)}

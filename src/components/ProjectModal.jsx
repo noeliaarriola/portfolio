@@ -36,6 +36,11 @@ export default function ProjectModal({ project, onClose }) {
 
     // Lock page scroll while modal is open
     document.documentElement.style.overflow = 'hidden'
+    // While the modal covers the page: the 3D loop pauses (useScrollAnimations)
+    // and the project rows' hover walls are taken out of the page (index.css,
+    // .modal-open), so their GPU memory goes to the case-study images instead.
+    document.documentElement.classList.add('modal-open')
+    document.dispatchEvent(new CustomEvent('modalchange', { detail: { open: true } }))
 
     gsap.fromTo(overlayRef.current,
       { autoAlpha: 0 },
@@ -48,6 +53,8 @@ export default function ProjectModal({ project, onClose }) {
 
     return () => {
       document.documentElement.style.overflow = ''
+      document.documentElement.classList.remove('modal-open')
+      document.dispatchEvent(new CustomEvent('modalchange', { detail: { open: false } }))
       // Locking/unlocking overflow can remove or restore the scrollbar,
       // shifting layout width slightly — enough to desync ScrollTrigger's
       // cached page-height measurement (same class of issue as on initial
@@ -146,7 +153,7 @@ export default function ProjectModal({ project, onClose }) {
                 playsInline
               />
             ) : (
-              <img src={project.image} alt={project.name} />
+              <img src={project.image} alt={project.name} decoding="async" />
             )}
           </div>
         )}

@@ -87,32 +87,52 @@ export default function useProfileEffect() {
     resizeObserver.observe(canvas)
     fit()
 
-    let frameId
+    // Render on demand. The shader has no time input: the picture only
+    // changes while uStrength is tweening (hover in/out) or when the box is
+    // resized. It used to redraw at 60fps forever — even with section 2
+    // hidden and a case-study modal open — which kept the GPU busy the whole
+    // visit and, together with the heavy case-study images, could exhaust GPU
+    // memory and crash the page (white canvas, broken images).
+    const draw = () => {
+      if (uniforms.uTexture.value) renderer.render(scene, camera)
+    }
 
     new THREE.TextureLoader().load(canvas.getAttribute('data-src'), (texture) => {
       uniforms.uTexture.value = texture
       imageAspect = texture.image.width / texture.image.height
       fit()
-      const animate = () => {
-        frameId = requestAnimationFrame(animate)
-        renderer.render(scene, camera)
-      }
-      animate()
+      draw()
     })
 
     const onMouseEnter = () =>
-      gsap.to(uniforms.uStrength, { value: 1, duration: 0.4, ease: 'power2.out' })
+      gsap.to(uniforms.uStrength, { value: 1, duration: 0.4, ease: 'power2.out', onUpdate: draw })
     const onMouseLeave = () =>
-      gsap.to(uniforms.uStrength, { value: 0, duration: 0.6, ease: 'power2.inOut' })
+      gsap.to(uniforms.uStrength, { value: 0, duration: 0.6, ease: 'power2.inOut', onUpdate: draw })
+
+    // If the GPU drops the context anyway, hide the canvas instead of leaving
+    // a blank box, and bring it back when the browser restores it.
+    const onContextLost = (e) => {
+      e.preventDefault()
+      canvas.style.visibility = 'hidden'
+    }
+    const onContextRestored = () => {
+      canvas.style.visibility = ''
+      fit()
+      draw()
+    }
+    canvas.addEventListener('webglcontextlost', onContextLost)
+    canvas.addEventListener('webglcontextrestored', onContextRestored)
 
     canvas.addEventListener('mouseenter', onMouseEnter)
     canvas.addEventListener('mouseleave', onMouseLeave)
 
     return () => {
-      cancelAnimationFrame(frameId)
+      gsap.killTweensOf(uniforms.uStrength)
       resizeObserver.disconnect()
       canvas.removeEventListener('mouseenter', onMouseEnter)
       canvas.removeEventListener('mouseleave', onMouseLeave)
+      canvas.removeEventListener('webglcontextlost', onContextLost)
+      canvas.removeEventListener('webglcontextrestored', onContextRestored)
       renderer.dispose()
     }
   }, [])

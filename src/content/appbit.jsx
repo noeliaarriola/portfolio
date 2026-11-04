@@ -142,19 +142,19 @@ function build(s) {
         <P text={s.role.p2} />
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/appbit-userflow.jpg" alt="AppBiT — complete user flow: map exploration, AI query loop and PDF export" /></div>
+          <div className="modal-media-slot"><img src="/media/appbit-userflow.jpg" loading="lazy" decoding="async" alt="AppBiT — complete user flow: map exploration, AI query loop and PDF export" /></div>
         </figure>
 
         <P text={s.role.p3} />
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/appbit-research.jpg" alt="AppBiT — user persona Carla Mendes, usage scenario, pain points and jobs-to-be-done" /></div>
+          <div className="modal-media-slot"><img src="/media/appbit-research.jpg" loading="lazy" decoding="async" alt="AppBiT — user persona Carla Mendes, usage scenario, pain points and jobs-to-be-done" /></div>
         </figure>
 
         <P text={s.role.p4} />
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/appbit-flow-assistente.jpg" alt="AppBiT — AI assistant mobile flow: question, analysis, evidence-backed answer and follow-up" /></div>
+          <div className="modal-media-slot"><img src="/media/appbit-flow-assistente.jpg" loading="lazy" decoding="async" alt="AppBiT — AI assistant mobile flow: question, analysis, evidence-backed answer and follow-up" /></div>
         </figure>
 
         <P text={s.role.p5} />
@@ -173,7 +173,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media">
-          <div className="modal-media-slot"><img src="/media/appbit-pitch-solucao.png" alt="Demo Day pitch — the solution: from question to grounded decision" /></div>
+          <div className="modal-media-slot"><img src="/media/appbit-pitch-solucao.png" loading="lazy" decoding="async" alt="Demo Day pitch — the solution: from question to grounded decision" /></div>
         </figure>
       </div>
     ),
@@ -211,7 +211,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--doc">
-          <div className="modal-media-slot"><img src="/media/appbit-design-system.jpg" alt="AppBiT design system — colors, typography and components" /></div>
+          <div className="modal-media-slot"><img src="/media/appbit-design-system.jpg" loading="lazy" decoding="async" alt="AppBiT design system — colors, typography and components" /></div>
         </figure>
 
         <div className="modal-subsection">
@@ -220,7 +220,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--doc">
-          <div className="modal-media-slot"><img src="/media/appbit-flow-onboarding.png" alt="AppBiT — mobile onboarding flow: splash and institutional login screens" /></div>
+          <div className="modal-media-slot"><img src="/media/appbit-flow-onboarding.png" loading="lazy" decoding="async" alt="AppBiT — mobile onboarding flow: splash and institutional login screens" /></div>
         </figure>
       </div>
     ),
@@ -231,7 +231,7 @@ function build(s) {
         <P text={s.outcome.p2} />
 
         <figure className="modal-media">
-          <div className="modal-media-slot"><img src="/media/appbit-pitch-conclusao.png" alt="Demo Day pitch — closing slide: try the MVP now, with QR code to install" /></div>
+          <div className="modal-media-slot"><img src="/media/appbit-pitch-conclusao.png" loading="lazy" decoding="async" alt="Demo Day pitch — closing slide: try the MVP now, with QR code to install" /></div>
         </figure>
 
         <h4 className="modal-list-title">{s.outcome.resultsTitle}</h4>

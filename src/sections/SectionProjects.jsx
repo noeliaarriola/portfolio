@@ -36,11 +36,14 @@ const PROJECTS = [
     year: '2024',
     tech: ['Figma', 'SEO'],
     thumb: '/media/powersis-cover.png',
-    image: '/media/powersis-cover.png',
+    image: '/media/powersis-desktop-poster.jpg', // poster shown while the cover video loads
+    video: '/media/powersis-desktop.mp4',
     wall: [
       { kind: 'desktop', shots: [shot('powersis-hero'), shot('powersis-servicos'), shot('powersis-sobre')] },
-      { kind: 'desktop', shots: [shot('powersis-servicos'), shot('powersis-sobre'), shot('powersis-hero')] },
-      { kind: 'desktop', shots: [shot('powersis-sobre'), shot('powersis-hero'), shot('powersis-servicos')] },
+      { kind: 'mobile', shots: [shot('powersis-mobile-hero'), shot('powersis-mobile-sobre')] },
+      { kind: 'desktop', shots: [shot('powersis-contato'), shot('powersis-servicos'), shot('powersis-clientes'), shot('powersis-hero')] },
+      { kind: 'mobile', shots: [shot('powersis-mobile-sobre'), shot('powersis-mobile-hero')] },
+      { kind: 'desktop', shots: [shot('powersis-sobre'), shot('powersis-clientes'), shot('powersis-hero'), shot('powersis-contato')] },
     ],
     content: powersisContent,
   },

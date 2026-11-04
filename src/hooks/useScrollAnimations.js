@@ -526,8 +526,35 @@ export default function useScrollAnimations() {
       if (animFrameId !== null) cancelAnimationFrame(animFrameId)
       animFrameId = null
     }
-    const onVisibility = () => (document.hidden ? stopLoop() : startLoop())
+    // Paused while the tab is hidden or a case-study modal covers the page
+    // (ProjectModal dispatches 'modalchange'). The modal's large images need
+    // the GPU memory far more than a globe nobody can see.
+    let modalOpen = false
+    let contextLost = false
+    const syncLoop = () =>
+      (document.hidden || modalOpen || contextLost ? stopLoop() : startLoop())
+    const onVisibility = () => syncLoop()
     document.addEventListener('visibilitychange', onVisibility)
+    const onModalChange = (e) => { modalOpen = !!e.detail?.open; syncLoop() }
+    document.addEventListener('modalchange', onModalChange)
+
+    // If the GPU process drops the WebGL context (memory pressure), the canvas
+    // used to stay as a blank white box over the centre column. Hide it until
+    // the browser restores the context, then resume.
+    const onContextLost = (e) => {
+      e.preventDefault() // tells the browser we want the context back
+      contextLost = true
+      canvas.style.visibility = 'hidden'
+      syncLoop()
+    }
+    const onContextRestored = () => {
+      contextLost = false
+      canvas.style.visibility = ''
+      drewEmptyFrame = false
+      syncLoop()
+    }
+    canvas.addEventListener('webglcontextlost', onContextLost)
+    canvas.addEventListener('webglcontextrestored', onContextRestored)
 
     // The loop still runs under reduced motion — see the guard inside
     // animate() above — so the globe/crane render and their scroll-driven
@@ -718,6 +745,9 @@ export default function useScrollAnimations() {
       })
       document.removeEventListener('themechange', onThemeChange)
       document.removeEventListener('visibilitychange', onVisibility)
+      document.removeEventListener('modalchange', onModalChange)
+      canvas.removeEventListener('webglcontextlost', onContextLost)
+      canvas.removeEventListener('webglcontextrestored', onContextRestored)
       window.removeEventListener('resize', onResize)
       window.removeEventListener('resize', onAboutResize)
       window.removeEventListener('load', onWindowLoad)

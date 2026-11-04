@@ -226,7 +226,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--doc">
-          <div className="modal-media-slot"><img src="/media/cleear-design-system.png" alt="Cleear Cosmetics — design system: color palette, typography, buttons and product card" /></div>
+          <div className="modal-media-slot"><img src="/media/cleear-design-system.png" loading="lazy" decoding="async" alt="Cleear Cosmetics — design system: color palette, typography, buttons and product card" /></div>
         </figure>
 
         <div className="modal-subsection">
