@@ -2348,21 +2348,27 @@ html, body {
     z-index: 4;
     pointer-events: none;
   }
+  /* Both columns get the same length (inline-size is the height in vertical
+     text) and the characters are spread evenly along it, so the five large
+     characters and the fifteen small ones start and end at the same line.
+     No letter-spacing: it would leave a gap after the last character. */
   .mobile-jp-main,
   .mobile-jp-sub {
+    display: block;
     writing-mode: vertical-rl;
+    inline-size: 136px;
     font-family: 'Noto Serif JP', serif;
     font-weight: 300;
     line-height: 1;
-    white-space: nowrap;
+    text-align: justify;
+    text-align-last: justify;
+    text-justify: inter-character;
   }
   .mobile-jp-main {
-    font-size: 17px;
-    letter-spacing: 0.3em;
+    font-size: 18px;
   }
   .mobile-jp-sub {
     font-size: 8px;
-    letter-spacing: 0.2em;
     color: var(--fg-muted);
   }
 }
