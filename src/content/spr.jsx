@@ -269,10 +269,18 @@ function build(s) {
           </ul>
         </div>
 
+        <figure className="modal-media modal-media--full">
+          <div className="modal-media-slot"><img src="/media/spr-site-areas.jpg" loading="lazy" decoding="async" alt="SPR Capital site — 'Áreas de atuação': six sector cards (real estate, agribusiness, infrastructure, startups, health and others)" /></div>
+        </figure>
+
         <div className="modal-subsection">
           <h4 className="modal-subsection-title">{s.decisions.sub5Title}</h4>
           <P text={s.decisions.sub5p} />
         </div>
+
+        <figure className="modal-media modal-media--full">
+          <div className="modal-media-slot"><img src="/media/spr-site-capital.jpg" loading="lazy" decoding="async" alt="SPR Capital site — 'Capital para empresas' section with the 'Captar recursos' call to action" /></div>
+        </figure>
       </div>
     ),
 
@@ -280,6 +288,14 @@ function build(s) {
       <div className="modal-content-text">
         <P text={s.outcome.p1} />
         <P text={s.outcome.p2} />
+
+        {/* The live site on desktop and on a phone, in one row at one height.
+            --ar is each screen's width / height. */}
+        <figure className="modal-media modal-media--devices">
+          <div className="modal-media-slot" style={{ '--ar': 1600 / 900 }}><img src="/media/spr-site-hero.jpg" loading="lazy" decoding="async" alt="SPR Capital site — homepage hero: 'Construímos conexões que aceleram o crescimento' with the two calls to action" /></div>
+          <div className="modal-media-slot" style={{ '--ar': 390 / 844 }}><img src="/media/spr-mobile-hero.jpg" loading="lazy" decoding="async" alt="SPR Capital on mobile — hero with 'Captar recursos' and 'Ser parceiro'" /></div>
+          <div className="modal-media-slot" style={{ '--ar': 390 / 844 }}><img src="/media/spr-mobile-areas.jpg" loading="lazy" decoding="async" alt="SPR Capital on mobile — 'Áreas de atuação' sector cards" /></div>
+        </figure>
 
         <h4 className="modal-list-title">{s.outcome.resultsTitle}</h4>
         {Results(s.outcome.results, s.outcome.resultsHighlight)}

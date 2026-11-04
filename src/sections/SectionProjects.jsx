@@ -53,14 +53,17 @@ const PROJECTS = [
     subtitle: 'A group project — designing a financial experience from UX research to a scalable solution',
     tags: 'UX RESEARCH / PRODUCT STRATEGY / UI DESIGN / RESPONSIVE',
     year: '2024',
-    tech: ['Figma', 'FigJam', 'Miro'],
+    tech: ['Figma', 'FigJam', 'Miro', 'Framer'],
+    link: 'https://sprcapital.framer.website/',
     thumb: '/media/spr-hero.jpg?v=2',
-    image: '/media/spr-hero.jpg?v=2',
-    // Provisional: research boards, until final screens are exported
+    image: '/media/spr-desktop-poster.jpg', // poster shown while the cover video loads
+    video: '/media/spr-desktop.mp4',
     wall: [
-      { kind: 'desktop', shots: [shot('spr-personas'), shot('spr-userflow'), shot('spr-ia')] },
-      { kind: 'desktop', shots: [shot('spr-define'), shot('spr-audit'), shot('spr-userflow')] },
-      { kind: 'desktop', shots: [shot('spr-ia'), shot('spr-personas'), shot('spr-define')] },
+      { kind: 'desktop', shots: [shot('spr-site-hero'), shot('spr-site-areas'), shot('spr-site-equipe')] },
+      { kind: 'mobile', shots: [shot('spr-mobile-hero'), shot('spr-mobile-areas')] },
+      { kind: 'desktop', shots: [shot('spr-site-capital'), shot('spr-site-quem'), shot('spr-site-contato'), shot('spr-site-hero')] },
+      { kind: 'mobile', shots: [shot('spr-mobile-quem'), shot('spr-mobile-contato')] },
+      { kind: 'desktop', shots: [shot('spr-site-areas'), shot('spr-site-contato'), shot('spr-site-hero'), shot('spr-site-capital')] },
     ],
     content: sprContent,
   },
