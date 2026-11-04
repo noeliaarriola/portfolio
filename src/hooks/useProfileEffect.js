@@ -42,7 +42,21 @@ export default function useProfileEffect() {
     const canvas = document.getElementById('profile-canvas')
     if (!canvas) return
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+    // Without WebGL (blocked by the browser — Chrome does this for a site
+    // after its GPU process has crashed a few times — or unavailable) this
+    // constructor throws. Uncaught, that error made React unmount the whole
+    // app: a completely white page. Show the plain photo instead and skip
+    // the hover effect.
+    let renderer
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+    } catch (err) {
+      console.warn('WebGL unavailable — showing the profile photo without the effect.', err)
+      canvas.style.backgroundImage = `url("${canvas.getAttribute('data-src')}")`
+      canvas.style.backgroundSize = 'cover'
+      canvas.style.backgroundPosition = 'center'
+      return
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
     const scene = new THREE.Scene()
