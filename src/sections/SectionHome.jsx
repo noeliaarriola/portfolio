@@ -54,6 +54,14 @@ export default function SectionHome() {
         <div className="bottom-dot">●</div>
       </div>
 
+      {/* Mobile/tablet only: the side rails fold away below 900px, so the
+          vertical Japanese text from col-right moves to the bottom-left
+          corner, smaller (index.css, .mobile-jp). */}
+      <div className="mobile-jp" aria-hidden="true">
+        <span className="mobile-jp-main">体験の設計</span>
+        <span className="mobile-jp-sub">シンプルさと人間中心のデザイン</span>
+      </div>
+
     </section>
   )
 }
