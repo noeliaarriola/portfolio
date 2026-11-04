@@ -47,14 +47,18 @@ export default function useProfileEffect() {
     // constructor throws. Uncaught, that error made React unmount the whole
     // app: a completely white page. Show the plain photo instead and skip
     // the hover effect.
+    // The photo is also the canvas's CSS background: WebGL paints over it
+    // (the shader is opaque), and whenever WebGL is missing or its context is
+    // lost, the plain photo shows through instead of an empty box.
+    canvas.style.backgroundImage = `url("${canvas.getAttribute('data-src')}")`
+    canvas.style.backgroundSize = 'cover'
+    canvas.style.backgroundPosition = 'center'
+
     let renderer
     try {
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
     } catch (err) {
       console.warn('WebGL unavailable — showing the profile photo without the effect.', err)
-      canvas.style.backgroundImage = `url("${canvas.getAttribute('data-src')}")`
-      canvas.style.backgroundSize = 'cover'
-      canvas.style.backgroundPosition = 'center'
       return
     }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -125,15 +129,10 @@ export default function useProfileEffect() {
 
     // If the GPU drops the context anyway, hide the canvas instead of leaving
     // a blank box, and bring it back when the browser restores it.
-    const onContextLost = (e) => {
-      e.preventDefault()
-      canvas.style.visibility = 'hidden'
-    }
-    const onContextRestored = () => {
-      canvas.style.visibility = ''
-      fit()
-      draw()
-    }
+    // A lost context leaves the canvas transparent, so the background photo
+    // shows; redraw the effect if the browser gives the context back.
+    const onContextLost = (e) => { e.preventDefault() }
+    const onContextRestored = () => { fit(); draw() }
     canvas.addEventListener('webglcontextlost', onContextLost)
     canvas.addEventListener('webglcontextrestored', onContextRestored)
 

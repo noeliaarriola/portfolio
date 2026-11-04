@@ -170,7 +170,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/powersis-sobre.jpg" loading="lazy" decoding="async" alt="Powersis — office, '+12 years in the market' and CREA registration" /></div>
+          <div className="modal-media-slot"><img src="/media/powersis-sobre.jpg?v=2" loading="lazy" decoding="async" alt="Powersis — office, '+12 years in the market' and CREA registration" /></div>
         </figure>
 
         <div className="modal-subsection">

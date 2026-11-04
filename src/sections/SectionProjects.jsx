@@ -54,8 +54,8 @@ const PROJECTS = [
     tags: 'UX RESEARCH / PRODUCT STRATEGY / UI DESIGN / RESPONSIVE',
     year: '2024',
     tech: ['Figma', 'FigJam', 'Miro'],
-    thumb: '/media/spr-hero.jpg',
-    image: '/media/spr-hero.jpg',
+    thumb: '/media/spr-hero.jpg?v=2',
+    image: '/media/spr-hero.jpg?v=2',
     // Provisional: research boards, until final screens are exported
     wall: [
       { kind: 'desktop', shots: [shot('spr-personas'), shot('spr-userflow'), shot('spr-ia')] },

@@ -192,7 +192,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/spr-audit.jpg" loading="lazy" decoding="async" alt="SPR Capital — competitive audit comparing Bloxs, BrBatel, Captal and B8 Partners across value proposition, audience, strengths and tech stack" /></div>
+          <div className="modal-media-slot"><img src="/media/spr-audit.jpg?v=2" loading="lazy" decoding="async" alt="SPR Capital — competitive audit comparing Bloxs, BrBatel, Captal and B8 Partners across value proposition, audience, strengths and tech stack" /></div>
         </figure>
 
         <h4 className="modal-list-title">{s.problem.challengesTitle}</h4>
@@ -216,7 +216,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/spr-personas.jpg" loading="lazy" decoding="async" alt="SPR Capital — the two personas with profiles, motivations, needs, user stories and end-to-end journey maps" /></div>
+          <div className="modal-media-slot"><img src="/media/spr-personas.jpg?v=2" loading="lazy" decoding="async" alt="SPR Capital — the two personas with profiles, motivations, needs, user stories and end-to-end journey maps" /></div>
         </figure>
 
         <div className="modal-subsection">
@@ -225,7 +225,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/spr-define.jpg" loading="lazy" decoding="async" alt="SPR Capital — pain points, problem statements for Pedro and Eduardo, and value propositions" /></div>
+          <div className="modal-media-slot"><img src="/media/spr-define.jpg?v=2" loading="lazy" decoding="async" alt="SPR Capital — pain points, problem statements for Pedro and Eduardo, and value propositions" /></div>
         </figure>
 
         <h4 className="modal-list-title">{s.role.methodsTitle}</h4>
@@ -258,7 +258,7 @@ function build(s) {
         </div>
 
         <figure className="modal-media modal-media--full">
-          <div className="modal-media-slot"><img src="/media/spr-userflow.jpg" loading="lazy" decoding="async" alt="SPR Capital — user flow from Home through navigation to the Empresários or Parceiros landing pages and confirmation" /></div>
+          <div className="modal-media-slot"><img src="/media/spr-userflow.jpg?v=2" loading="lazy" decoding="async" alt="SPR Capital — user flow from Home through navigation to the Empresários or Parceiros landing pages and confirmation" /></div>
         </figure>
 
         <div className="modal-subsection">

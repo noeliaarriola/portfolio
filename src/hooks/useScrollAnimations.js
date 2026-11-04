@@ -68,7 +68,11 @@ export default function useScrollAnimations() {
     try {
       renderer = new THREE.WebGLRenderer({
         canvas,
-        antialias: true,
+        // MSAA multiplies the drawing buffer's GPU memory (~4x color + depth).
+        // On a 2x screen the canvas is already drawn at twice the resolution,
+        // so it adds little to thin lines — and this canvas covers the whole
+        // centre column for the entire visit.
+        antialias: window.devicePixelRatio < 2,
         alpha: true,
         powerPreference: 'low-power',
       })
@@ -535,7 +539,17 @@ export default function useScrollAnimations() {
       (document.hidden || modalOpen || contextLost ? stopLoop() : startLoop())
     const onVisibility = () => syncLoop()
     document.addEventListener('visibilitychange', onVisibility)
-    const onModalChange = (e) => { modalOpen = !!e.detail?.open; syncLoop() }
+    // While the modal is open the drawing buffer shrinks to a few pixels,
+    // handing its GPU memory (tens to hundreds of MB on a large screen) to the
+    // case-study images; applyResize() restores it when the modal closes.
+    const onModalChange = (e) => {
+      modalOpen = !!e.detail?.open
+      if (renderer && !contextLost) {
+        if (modalOpen) renderer.setSize(1, 1, false)
+        else { applyResize(); drewEmptyFrame = false }
+      }
+      syncLoop()
+    }
     document.addEventListener('modalchange', onModalChange)
 
     // If the GPU process drops the WebGL context (memory pressure), the canvas
