@@ -13,6 +13,14 @@
       "destination": "/appbit/index.html"
     },
     {
+      "source": "/space-historians",
+      "destination": "/space-historians/index.html"
+    },
+    {
+      "source": "/space-historians/",
+      "destination": "/space-historians/index.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

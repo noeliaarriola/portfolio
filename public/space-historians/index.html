@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<base href="/space-historians/" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Space Historians — NASA Space Apps 2026</title>
+<meta name="description" content="Space Historians: a playable 3D learning experience for children aged 8–12. NASA Space Apps Challenge 2026." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #020816; }
+  body { font-family: 'Nunito Sans', Arial, sans-serif; }
+
+  /* Escenario 1600×900 siempre centrado y escalado a la ventana */
+  #deck {
+    position: absolute; left: 50%; top: 50%; width: 1600px; height: 900px; overflow: hidden;
+    transform: translate(-50%, -50%) scale(var(--s, 1));
+    /* Espacio profundo: casi negro, con un resplandor azul arriba a la derecha y un toque cálido abajo */
+    background:
+      radial-gradient(ellipse 65% 55% at 88% -5%, rgba(38, 78, 168, .38), transparent 70%),
+      radial-gradient(ellipse 50% 45% at -5% 105%, rgba(255, 149, 72, .07), transparent 70%),
+      linear-gradient(165deg, #0a1534 0%, #050c22 48%, #02050f 100%);
+  }
+  #stars { position: absolute; inset: 0; pointer-events: none; }
+  #stars i { position: absolute; border-radius: 50%; background: #fff; }
+  .star-layer { position: absolute; top: 0; left: 0; width: 3200px; height: 900px; will-change: transform; }
+
+  /* ── Escala tipográfica: 6 niveles, cada uno con una sola combinación ── */
+  .t-logo      { font: 800 118px/.88 'Barlow Condensed', sans-serif; letter-spacing: .03em; text-transform: uppercase; }
+  .t-title     { display: inline-block; font: 800 78px/.9 'Barlow Condensed', sans-serif; color: #f8f7f2; letter-spacing: -.01em; text-transform: uppercase; text-shadow: 0 8px 40px rgba(0, 0, 0, .5); }
+  .t-title em  { font-style: normal; color: #ff9548; text-shadow: 0 0 34px rgba(255, 149, 72, .4); }
+  .t-highlight { font: 700 34px/1.08 'Barlow Condensed', sans-serif; color: #e8ff00; letter-spacing: .005em; }
+  .t-step      { font: 800 34px/1 'Barlow Condensed', sans-serif; color: #e8ff00; }
+  .t-label     { font: 800 18px/1.25 'Nunito Sans', sans-serif; color: #ff9548; letter-spacing: .1em; }
+  .t-body      { font: 400 20px/1.5 'Nunito Sans', sans-serif; }
+  .t-small     { font: 400 16px/1.4 'Nunito Sans', sans-serif; color: #b8c1db; }
+  .t-section   { font: 800 14px/1.3 'Nunito Sans', sans-serif; color: #2498f3; letter-spacing: .2em; }
+  .content { position: absolute; inset: 0; }
+  .slide { position: absolute; inset: 0; visibility: hidden; perspective: 1800px; }
+  .slide.on { visibility: visible; }
+  .el { position: absolute; overflow: hidden; }
+  .txt { padding: 4.8px 9.6px; overflow: visible; }
+  .txt p { white-space: pre-wrap; }
+  .pic img { position: absolute; max-width: none; display: block; }
+  .shine { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%); transform: translateX(-130%); pointer-events: none; }
+
+  /* Controles discretos */
+  .nav { position: fixed; left: 50%; bottom: 14px; z-index: 5; display: flex; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.08); color: #b8c1db; font: 700 12px Arial; transform: translateX(-50%); opacity: .25; transition: opacity .3s; }
+  .nav:hover { opacity: 1; }
+  .nav button { width: 28px; height: 28px; border: 0; border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+<main id="deck">
+<div id="stars"></div>
+<section class="slide" data-n="1">
+<div class="el shape" style="left:0.0px;top:0.0px;width:720.0px;height:900.0px;background:rgba(3,9,26,.55);backdrop-filter:blur(2px);"></div>
+<div class="el pic" style="left:660.0px;top:0.0px;width:940.0px;height:900.0px;"><img src="img/image1.png" alt="" style="width:187.645%;height:100.000%;left:-43.823%;top:-0.000%"></div>
+<div class="el shape" style="left:704.0px;top:0.0px;width:16.0px;height:900.0px;background:#0D56C8;"></div>
+<div class="el txt" style="left:82.0px;top:75.0px;width:500.0px;height:34.0px;"><p><span class="t-section" style="">NASA SPACE APPS CHALLENGE 2026</span></p></div>
+<div class="el txt" style="left:82.0px;top:205.0px;width:540.0px;height:190.0px;"><p><span class="t-logo" style="color:#F8F7F2;font-size:118.0px;">SPACE</span></p><p><span class="t-logo" style="color:#FF9548;font-size:104.0px;">HISTORIANS</span></p></div>
+<div class="el shape" style="left:82.0px;top:433.0px;width:110.0px;height:8.0px;background:#E8FF00;"></div>
+<div class="el txt" style="left:82.0px;top:495.0px;width:500.0px;height:50.0px;"><p><span class="t-highlight" style="color:#F8F7F2;">The Moon is a museum.</span></p></div>
+<div class="el txt" style="left:82.0px;top:585.0px;width:500.0px;height:70.0px;"><p><span class="t-body" style="color:#B8C1DB;">Every object left behind has a story to tell.</span></p></div>
+<div class="el txt" style="left:82.0px;top:778.0px;width:520.0px;height:46.0px;"><p><span class="t-section" style="">A playable 3D learning experience for children aged 8–12</span></p></div>
+</section>
+<section class="slide" data-n="2">
+<div class="el shape" style="left:72.0px;top:55.0px;width:8.0px;height:46.0px;background:#E8FF00;"></div>
+<div class="el txt" style="left:98.0px;top:57.0px;width:460.0px;height:34.0px;"><p><span class="t-section" style="">THE CHALLENGE</span></p></div>
+<div class="el txt" style="left:72.0px;top:112.0px;width:1400.0px;height:72.0px;"><p><span class="t-title" style="color:#F8F7F2;">Space history becomes meaningful when children <em>can investigate it</em></span></p></div>
+<div class="el pic" style="left:755.0px;top:210.0px;width:770.0px;height:510.0px;border-radius:12.0px;"><img src="img/image2.png" alt="" style="width:129.056%;height:100.000%;left:-14.528%;top:-0.000%"></div>
+<div class="el txt" style="left:72.0px;top:228.0px;width:620.0px;height:210.0px;"><p><span class="t-body" style="color:#B8C1DB;">Mission records, technical explanations and historical photographs contain remarkable stories. For younger audiences, however, the connections between an object, its purpose and the people behind it can be difficult to see.</span></p></div>
+<div class="el txt" style="left:72.0px;top:500.0px;width:610.0px;height:92.0px;"><p><span class="t-highlight" style="">Space Historians places those sources inside an explorable lunar world.</span></p></div>
+<div class="el txt" style="left:72.0px;top:625.0px;width:580.0px;height:62.0px;"><p><span class="t-body" style="color:#F8F7F2;">Children find the equipment first. The questions come next.</span></p></div>
+<div class="el shape" style="left:790.0px;top:690.0px;width:700.0px;height:76.0px;border-radius:12.0px;background:#111A3D;border:1.0px solid #33426A;"></div>
+<div class="el txt" style="left:820.0px;top:710.0px;width:650.0px;height:35.0px;"><p><span class="t-label" style="">A browser-based experience with no installation required</span></p></div>
+<div class="el txt" style="left:1510.0px;top:834.0px;width:50.0px;height:24.0px;"><p><span class="t-section" style="">02</span></p></div>
+</section>
+<section class="slide" data-n="3">
+<div class="el shape" style="left:72.0px;top:55.0px;width:8.0px;height:46.0px;background:#E8FF00;"></div>
+<div class="el txt" style="left:98.0px;top:57.0px;width:460.0px;height:34.0px;"><p><span class="t-section" style="">KNOWLEDGE BECOMES PROGRESS</span></p></div>
+<div class="el txt" style="left:72.0px;top:112.0px;width:1400.0px;height:72.0px;"><p><span class="t-title" style="color:#F8F7F2;">Three layers turn one discovery into <em>a learning journey</em></span></p></div>
+<div class="el pic" style="left:80.0px;top:220.0px;width:457.0px;height:405.0px;border-radius:12.0px;"><img src="img/image3.png" alt="" style="width:105.066%;height:100.000%;left:-2.533%;top:-0.000%"></div>
+<div class="el pic" style="left:582.0px;top:220.0px;width:465.0px;height:405.0px;border-radius:12.0px;"><img src="img/image4.png" alt="" style="width:104.989%;height:100.000%;left:-2.495%;top:-0.000%"></div>
+<div class="el pic" style="left:1092.0px;top:220.0px;width:465.0px;height:405.0px;border-radius:12.0px;"><img src="img/image5.png" alt="" style="width:106.637%;height:100.000%;left:-3.319%;top:-0.000%"></div>
+<div class="el txt" style="left:72.0px;top:655.0px;width:55.0px;height:32.0px;"><p><span class="t-step" style="">01</span></p></div>
+<div class="el txt" style="left:140.0px;top:655.0px;width:260.0px;height:32.0px;"><p><span class="t-label" style="">WHAT IS IT?</span></p></div>
+<div class="el txt" style="left:447.0px;top:655.0px;width:90.0px;height:32.0px;"><p><span class="t-label" style="">+10</span></p></div>
+<div class="el txt" style="left:582.0px;top:655.0px;width:55.0px;height:32.0px;"><p><span class="t-step" style="">02</span></p></div>
+<div class="el txt" style="left:650.0px;top:655.0px;width:260.0px;height:32.0px;"><p><span class="t-label" style="">WHAT DID IT DO?</span></p></div>
+<div class="el txt" style="left:957.0px;top:655.0px;width:90.0px;height:32.0px;"><p><span class="t-label" style="">+20</span></p></div>
+<div class="el txt" style="left:1092.0px;top:655.0px;width:55.0px;height:32.0px;"><p><span class="t-step" style="">03</span></p></div>
+<div class="el txt" style="left:1160.0px;top:655.0px;width:260.0px;height:32.0px;"><p><span class="t-label" style="">HOW DO WE KNOW?</span></p></div>
+<div class="el txt" style="left:1467.0px;top:655.0px;width:90.0px;height:32.0px;"><p><span class="t-label" style="">+30</span></p></div>
+<div class="el txt" style="left:72.0px;top:704.0px;width:455.0px;height:58.0px;"><p><span class="t-body" style="color:#B8C1DB;">Identify the object and its mission.</span></p></div>
+<div class="el txt" style="left:582.0px;top:704.0px;width:455.0px;height:58.0px;"><p><span class="t-body" style="color:#B8C1DB;">See how the equipment worked.</span></p></div>
+<div class="el txt" style="left:1092.0px;top:704.0px;width:455.0px;height:58.0px;"><p><span class="t-body" style="color:#B8C1DB;">Connect records with scientific evidence.</span></p></div>
+<div class="el txt" style="left:72.0px;top:802.0px;width:1400.0px;height:40.0px;"><p><span class="t-highlight" style="">Players earn points by learning. Optional quizzes add bonus points without blocking exploration.</span></p></div>
+<div class="el txt" style="left:1510.0px;top:834.0px;width:50.0px;height:24.0px;"><p><span class="t-section" style="">03</span></p></div>
+</section>
+<section class="slide" data-n="4">
+<div class="el shape" style="left:72.0px;top:55.0px;width:8.0px;height:46.0px;background:#E8FF00;"></div>
+<div class="el txt" style="left:98.0px;top:57.0px;width:460.0px;height:34.0px;"><p><span class="t-section" style="">INSIDE A DISCOVERY</span></p></div>
+<div class="el txt" style="left:72.0px;top:112.0px;width:1400.0px;height:72.0px;"><p><span class="t-title" style="color:#F8F7F2;">Discovery cards turn evidence <em>into play</em></span></p></div>
+<div class="el pic" style="left:72.0px;top:205.0px;width:800.0px;height:610.0px;border-radius:12.0px;"><img src="img/image6.png" alt="" style="width:100.000%;height:109.433%;left:-0.000%;top:-4.717%"></div>
+<div class="el txt" style="left:930.0px;top:235.0px;width:530.0px;height:46.0px;"><p><span class="t-label" style="">APOLLO 12 ALSEP</span></p></div>
+<div class="el txt" style="left:930.0px;top:295.0px;width:520.0px;height:48.0px;"><p><span class="t-highlight" style="color:#F8F7F2;">“The ground kept the departure”</span></p></div>
+<div class="el txt" style="left:930.0px;top:375.0px;width:520.0px;height:150.0px;"><p><span class="t-body" style="color:#B8C1DB;">The player links a mission record with a seismic signal to understand why the ground moved after the spacecraft had already left.</span></p></div>
+<div class="el shape" style="left:930.0px;top:565.0px;width:520.0px;height:2.0px;background:#33426A;"></div>
+<div class="el txt" style="left:930.0px;top:610.0px;width:520.0px;height:110.0px;"><p><span class="t-body" style="color:#F8F7F2;">The card also separates documented history from the game’s simplified representation.</span></p></div>
+<div class="el txt" style="left:930.0px;top:760.0px;width:520.0px;height:48.0px;"><p><span class="t-highlight" style="">Science becomes something the player does.</span></p></div>
+<div class="el txt" style="left:1510.0px;top:834.0px;width:50.0px;height:24.0px;"><p><span class="t-section" style="">04</span></p></div>
+</section>
+<section class="slide" data-n="5">
+<div class="el shape" style="left:72.0px;top:55.0px;width:8.0px;height:46.0px;background:#E8FF00;"></div>
+<div class="el txt" style="left:98.0px;top:57.0px;width:460.0px;height:34.0px;"><p><span class="t-section" style="">LUNAR DISCOVERY ROUTE</span></p></div>
+<div class="el txt" style="left:72.0px;top:112.0px;width:1400.0px;height:72.0px;"><p><span class="t-title" style="color:#F8F7F2;">Twelve objects share one reusable <em>learning system</em></span></p></div>
+<div class="el pic" style="left:72.0px;top:205.0px;width:700.0px;height:555.0px;border-radius:12.0px;"><img src="img/image7.png" alt="" style="width:155.807%;height:100.000%;left:-27.903%;top:-0.000%"></div>
+<div class="el txt" style="left:830.0px;top:220.0px;width:300.0px;height:32.0px;"><p><span class="t-label" style="">APOLLO 11</span></p></div>
+<div class="el txt" style="left:1175.0px;top:220.0px;width:300.0px;height:32.0px;"><p><span class="t-label" style="">APOLLO 12</span></p></div>
+<div class="el txt" style="left:830.0px;top:262.0px;width:300.0px;height:90.0px;"><p><span class="t-body" style="color:#F8F7F2;">Laser reflector</span></p><p><span class="t-body" style="color:#F8F7F2;">Eagle descent stage</span></p><p><span class="t-body" style="color:#F8F7F2;">Passive seismometer</span></p></div>
+<div class="el txt" style="left:1175.0px;top:262.0px;width:300.0px;height:90.0px;"><p><span class="t-body" style="color:#F8F7F2;">ALSEP station</span></p><p><span class="t-body" style="color:#F8F7F2;">Surveyor 3</span></p></div>
+<div class="el txt" style="left:830.0px;top:385.0px;width:300.0px;height:32.0px;"><p><span class="t-label" style="">APOLLO 14</span></p></div>
+<div class="el txt" style="left:1175.0px;top:385.0px;width:300.0px;height:32.0px;"><p><span class="t-label" style="">APOLLO 15</span></p></div>
+<div class="el txt" style="left:830.0px;top:427.0px;width:300.0px;height:90.0px;"><p><span class="t-body" style="color:#F8F7F2;">ALSEP station</span></p></div>
+<div class="el txt" style="left:1175.0px;top:427.0px;width:300.0px;height:90.0px;"><p><span class="t-body" style="color:#F8F7F2;">ALSEP station</span></p><p><span class="t-body" style="color:#F8F7F2;">Lunar Rover</span></p></div>
+<div class="el txt" style="left:830.0px;top:550.0px;width:300.0px;height:32.0px;"><p><span class="t-label" style="">APOLLO 16</span></p></div>
+<div class="el txt" style="left:1175.0px;top:550.0px;width:300.0px;height:32.0px;"><p><span class="t-label" style="">APOLLO 17</span></p></div>
+<div class="el txt" style="left:830.0px;top:592.0px;width:300.0px;height:90.0px;"><p><span class="t-body" style="color:#F8F7F2;">ALSEP station</span></p><p><span class="t-body" style="color:#F8F7F2;">Lunar Rover</span></p></div>
+<div class="el txt" style="left:1175.0px;top:592.0px;width:300.0px;height:90.0px;"><p><span class="t-body" style="color:#F8F7F2;">ALSEP station</span></p><p><span class="t-body" style="color:#F8F7F2;">Lunar Rover</span></p></div>
+<div class="el shape" style="left:830.0px;top:730.0px;width:690.0px;height:76.0px;border-radius:12.0px;background:#0D56C8;"></div>
+<div class="el txt" style="left:860.0px;top:748.0px;width:640.0px;height:46.0px;"><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Each object can load its own story, activities, images, scoring and translations.</span></p></div>
+<div class="el txt" style="left:1510.0px;top:834.0px;width:50.0px;height:24.0px;"><p><span class="t-section" style="">05</span></p></div>
+</section>
+<section class="slide" data-n="6">
+<div class="el shape" style="left:72.0px;top:55.0px;width:8.0px;height:46.0px;background:#E8FF00;"></div>
+<div class="el txt" style="left:98.0px;top:57.0px;width:460.0px;height:34.0px;"><p><span class="t-section" style="">CURRENT PROTOTYPE</span></p></div>
+<div class="el txt" style="left:72.0px;top:112.0px;width:1400.0px;height:72.0px;"><p><span class="t-title" style="color:#F8F7F2;">Playable today, designed <em>to grow</em></span></p></div>
+<div class="el pic" style="left:72.0px;top:210.0px;width:590.0px;height:360.0px;border-radius:12.0px;"><img src="img/image8.png" alt="" style="width:119.844%;height:100.000%;left:-9.922%;top:-0.000%"></div>
+<div class="el pic" style="left:700.0px;top:210.0px;width:400.0px;height:360.0px;border-radius:12.0px;"><img src="img/image9.png" alt="" style="width:175.463%;height:100.000%;left:-37.732%;top:-0.000%"></div>
+<div class="el txt" style="left:1145.0px;top:215.0px;width:340.0px;height:32.0px;"><p><span class="t-label" style="">AVAILABLE NOW</span></p></div>
+<div class="el txt" style="left:1145.0px;top:265.0px;width:370.0px;height:200.0px;"><p><span class="t-body" style="color:#F8F7F2;">12 structured discoveries</span></p><p><span class="t-body" style="color:#F8F7F2;">Portuguese and English</span></p><p><span class="t-body" style="color:#F8F7F2;">Keyboard and touchscreen controls</span></p><p><span class="t-body" style="color:#F8F7F2;">Activities, scoring and local progress</span></p></div>
+<div class="el shape" style="left:72.0px;top:650.0px;width:1450.0px;height:2.0px;background:#33426A;"></div>
+<div class="el txt" style="left:72.0px;top:690.0px;width:250.0px;height:32.0px;"><p><span class="t-label" style="">NEXT PHASE</span></p></div>
+<div class="el txt" style="left:72.0px;top:742.0px;width:1380.0px;height:70.0px;"><p><span class="t-highlight" style="">Add Spanish, test with children and educators, refine accessibility, and extend the same model to a future Mars expedition.</span></p></div>
+<div class="el txt" style="left:1510.0px;top:834.0px;width:50.0px;height:24.0px;"><p><span class="t-section" style="">06</span></p></div>
+</section>
+<section class="slide" data-n="7">
+<div class="el shape" style="left:72.0px;top:55.0px;width:8.0px;height:46.0px;background:#E8FF00;"></div>
+<div class="el txt" style="left:98.0px;top:57.0px;width:460.0px;height:34.0px;"><p><span class="t-section" style="">MEET THE TEAM</span></p></div>
+<div class="el txt" style="left:72.0px;top:112.0px;width:1400.0px;height:72.0px;"><p><span class="t-title" style="color:#F8F7F2;">Five perspectives behind one <em>lunar archive</em></span></p></div>
+<div class="el pic" style="left:72.0px;top:230.0px;width:220.0px;height:250.0px;border-radius:12.0px;"><img src="img/image10.jpeg" alt="" style="width:100.000%;height:117.332%;left:-0.000%;top:-8.666%"></div>
+<div class="el pic" style="left:372.0px;top:230.0px;width:220.0px;height:250.0px;border-radius:12.0px;"><img src="img/image11.jpeg" alt="" style="width:100.000%;height:117.332%;left:-0.000%;top:-8.666%"></div>
+<div class="el pic" style="left:672.0px;top:230.0px;width:220.0px;height:250.0px;border-radius:12.0px;"><img src="img/image12.jpeg" alt="" style="width:100.000%;height:117.332%;left:-0.000%;top:-8.666%"></div>
+<div class="el pic" style="left:972.0px;top:230.0px;width:220.0px;height:250.0px;border-radius:12.0px;"><img src="img/image13.jpeg" alt="" style="width:100.000%;height:115.173%;left:-0.000%;top:-7.586%"></div>
+<div class="el pic" style="left:1272.0px;top:230.0px;width:220.0px;height:250.0px;border-radius:12.0px;"><img src="img/image14.jpeg" alt="" style="width:100.000%;height:117.332%;left:-0.000%;top:-8.666%"></div>
+<div class="el shape" style="left:72.0px;top:498.0px;width:220.0px;height:5.0px;background:#E8FF00;"></div>
+<div class="el shape" style="left:372.0px;top:498.0px;width:220.0px;height:5.0px;background:#2498F3;"></div>
+<div class="el shape" style="left:672.0px;top:498.0px;width:220.0px;height:5.0px;background:#2498F3;"></div>
+<div class="el shape" style="left:972.0px;top:498.0px;width:220.0px;height:5.0px;background:#2498F3;"></div>
+<div class="el shape" style="left:1272.0px;top:498.0px;width:220.0px;height:5.0px;background:#2498F3;"></div>
+<div class="el txt" style="left:72.0px;top:530.0px;width:220.0px;height:70.0px;"><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Fernando</span></p><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Rodrigues</span></p></div>
+<div class="el txt" style="left:372.0px;top:530.0px;width:220.0px;height:70.0px;"><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Maria Fernanda</span></p><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Rodrigues</span></p></div>
+<div class="el txt" style="left:672.0px;top:530.0px;width:220.0px;height:70.0px;"><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Maysa Ferreira</span></p><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Rodrigues</span></p></div>
+<div class="el txt" style="left:972.0px;top:530.0px;width:220.0px;height:70.0px;"><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Noelia Daiana</span></p><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Limp Arriola</span></p></div>
+<div class="el txt" style="left:1272.0px;top:530.0px;width:220.0px;height:70.0px;"><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Sabrina Dias de</span></p><p><span class="t-body" style="color:#F8F7F2;font-weight:800;">Oliveira</span></p></div>
+<div class="el txt" style="left:72.0px;top:620.0px;width:220.0px;height:62.0px;"><p><span class="t-small" style="">Software Development</span></p></div>
+<div class="el txt" style="left:372.0px;top:620.0px;width:220.0px;height:62.0px;"><p><span class="t-small" style="">Product Concept &amp;</span></p><p><span class="t-small" style="">Storytelling</span></p></div>
+<div class="el txt" style="left:672.0px;top:620.0px;width:220.0px;height:62.0px;"><p><span class="t-small" style="">Product Concept &amp;</span></p><p><span class="t-small" style="">Storytelling</span></p></div>
+<div class="el txt" style="left:972.0px;top:620.0px;width:220.0px;height:62.0px;"><p><span class="t-small" style="">UX Design</span></p></div>
+<div class="el txt" style="left:1272.0px;top:620.0px;width:220.0px;height:62.0px;"><p><span class="t-small" style="">Project Coordination</span></p></div>
+<div class="el txt" style="left:72.0px;top:752.0px;width:1410.0px;height:52.0px;"><p><span class="t-highlight" style="">The Moon keeps the evidence. Space Historians gives a new generation a way to investigate it.</span></p></div>
+<div class="el txt" style="left:72.0px;top:825.0px;width:620.0px;height:26.0px;"><p><span class="t-section" style="">github.com/GridWebTi/space-historians-web</span></p></div>
+<div class="el txt" style="left:1510.0px;top:834.0px;width:50.0px;height:24.0px;"><p><span class="t-section" style="">07</span></p></div>
+</section>
+</main>
+<div class="nav"><button id="prev" aria-label="Previous slide">‹</button><span id="count">1 / 7</span><button id="next" aria-label="Next slide">›</button></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+  const deck = document.getElementById('deck');
+  const fit = () => deck.style.setProperty('--s', Math.min(innerWidth / 1600, innerHeight / 900));
+  addEventListener('resize', fit); fit();
+
+  // Campo de estrellas en movimiento constante: dos capas (lejana lenta, cercana más rápida).
+  // Cada capa mide 2 pantallas de ancho con el mismo patrón repetido, así el bucle no tiene salto.
+  const starBox = document.getElementById('stars');
+  function starLayer(count, sizes, opacity, brightChance, seconds) {
+    const layer = document.createElement('div');
+    layer.className = 'star-layer';
+    const pattern = Array.from({ length: count }, () => ({
+      x: Math.random() * 1600, y: Math.random() * 900,
+      size: sizes[Math.floor(Math.random() * sizes.length)],
+      bright: Math.random() < brightChance,
+      o: opacity[0] + Math.random() * (opacity[1] - opacity[0]),
+    }));
+    [0, 1600].forEach((offset) => pattern.forEach((p) => {
+      const s = document.createElement('i');
+      const size = p.bright ? 2.4 : p.size;
+      Object.assign(s.style, {
+        left: p.x + offset + 'px', top: p.y + 'px', width: size + 'px', height: size + 'px',
+        opacity: p.bright ? .8 : p.o.toFixed(2),
+        boxShadow: p.bright ? '0 0 6px 1px rgba(190, 210, 255, .55)' : 'none',
+      });
+      layer.appendChild(s);
+    }));
+    starBox.appendChild(layer);
+    gsap.to(layer, { x: -1600, duration: seconds, ease: 'none', repeat: -1 });
+    return layer;
+  }
+  starLayer(200, [1, 1, 1.4], [.15, .4], .02, 160);   // fondo lejano
+  starLayer(60, [1.6, 2], [.35, .6], .12, 70);        // capa cercana
+  gsap.to('#stars i', { opacity: '*=0.35', duration: 'random(2.5, 6)', repeat: -1, yoyo: true, ease: 'sine.inOut', stagger: { each: .01, from: 'random' } });
+
+  const slides = [...document.querySelectorAll('.slide')];
+
+  // Títulos grandes: si ocupan 2 líneas, el contenido de abajo baja y se ajusta
+  // (escala proporcional anclada a la izquierda y abajo) para no superponerse.
+  function reflow() {
+    slides.forEach((slide) => {
+      const t = slide.querySelector('.t-title');
+      if (!t || slide.querySelector('.content')) return;
+      const box = t.closest('.el');
+      const titleBottom = box.offsetTop + t.offsetHeight + 10;
+      const rest = [...slide.querySelectorAll(':scope > .el')].filter((el) =>
+        el.offsetTop > box.offsetTop + 20 && !(el.offsetTop > 800 && /^\d\d$/.test(el.textContent.trim())));
+      const top = Math.min(...rest.map((el) => el.offsetTop));
+      const bottom = Math.max(...rest.map((el) => el.offsetTop + el.offsetHeight));
+      const target = titleBottom + 26;
+      if (target <= top) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'content';
+      rest.forEach((el) => wrap.appendChild(el));
+      slide.appendChild(wrap);
+      const s = (bottom - target) / (bottom - top);
+      wrap.style.transformOrigin = `${box.offsetLeft}px ${bottom}px`;
+      wrap.style.transform = `scale(${s.toFixed(4)})`;
+    });
+  }
+  let current = -1, busy = false;
+  const timelines = [];
+
+  // Brillo sobre la tarjeta del ALSEP (diapositiva 4)
+  const card = slides[3].querySelector('.pic');
+  card.insertAdjacentHTML('beforeend', '<div class="shine"></div>');
+
+  function enter(slide, n) {
+    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    const els = [...slide.querySelectorAll('.el')];
+    const step = Math.min(0.07, 1.4 / els.length); // la entrada completa dura ~2 s como máximo
+    els.forEach((el, i) => {
+      const at = 0.15 + i * step;
+      const w = el.offsetWidth, h = el.offsetHeight;
+      if (el.classList.contains('shape') && (w < 24 || h < 24)) {
+        // Barras y líneas de acento: crecen desde un extremo
+        tl.from(el, w < h ? { scaleY: 0, transformOrigin: 'top', duration: .6 } : { scaleX: 0, transformOrigin: 'left', duration: .7 }, at);
+      } else if (el.classList.contains('shape')) {
+        tl.from(el, { opacity: 0, scale: .96, duration: .7 }, at);
+      } else if (el.classList.contains('pic')) {
+        tl.from(el, { opacity: 0, scale: .92, y: 20, duration: 1 }, at);
+      } else {
+        tl.from(el, { opacity: 0, y: 28, duration: .7 }, at);
+      }
+    });
+    if (n === 1) tl.fromTo(card, { rotateY: -24, x: -80, opacity: 0 }, { rotateY: 0, x: 0, opacity: 1, duration: 1.3, ease: 'expo.out' }, .3)
+                   .to(card.querySelector('.shine'), { x: '130%', duration: 1.2, ease: 'power2.inOut' }, 1.4);
+    return tl;
+  }
+
+  function go(n) {
+    n = Math.max(0, Math.min(slides.length - 1, n));
+    if (n === current || busy) return;
+    busy = true;
+    const prev = slides[current], next = slides[n];
+    const dir = n > current ? 1 : -1;
+    gsap.set(next, { zIndex: 2, xPercent: 0, opacity: 1 });
+    next.classList.add('on');
+    timelines[n]?.revert(); // vuelve al estado original antes de repetir la entrada
+    if (prev) {
+      gsap.set(prev, { zIndex: 1 });
+      gsap.fromTo(next, { opacity: 0, x: 60 * dir }, { opacity: 1, x: 0, duration: .6, ease: 'power2.out' });
+      gsap.to(prev, { opacity: 0, x: -60 * dir, duration: .5, ease: 'power2.in', onComplete: () => { prev.classList.remove('on'); gsap.set(prev, { x: 0 }); } });
+    }
+    timelines[n] = enter(next, n === 3 ? 1 : 0);
+    current = n;
+    document.getElementById('count').textContent = `${n + 1} / ${slides.length}`;
+    setTimeout(() => busy = false, 500);
+  }
+
+  addEventListener('keydown', (e) => {
+    if (['ArrowRight', 'ArrowDown', ' ', 'PageDown', 'Enter'].includes(e.key)) { e.preventDefault(); go(current + 1); }
+    if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); go(current - 1); }
+    if (e.key === 'Home') go(0);
+    if (e.key === 'End') go(slides.length - 1);
+    if (e.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  });
+  deck.addEventListener('click', () => go(current + 1));
+  document.getElementById('next').onclick = () => go(current + 1);
+  document.getElementById('prev').onclick = () => go(current - 1);
+
+  // Esperar las fuentes para medir bien los títulos antes de mostrar nada
+  document.fonts.ready.then(() => {
+    reflow();
+    const start = parseInt(location.hash.slice(1), 10);
+    go(Number.isFinite(start) ? start - 1 : 0);
+  });
+</script>
+</body>
+</html>
